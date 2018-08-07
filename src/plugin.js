@@ -1,41 +1,49 @@
-function createApi () {
-  return {
-    createProblem (numberOfSteps, excludedTraces = null, metadata = null) {
-      return Promise.resolve()
-    },
+import { createEventLogStore } from './eventlogstore'
+import { createProblemStore } from './problemstore'
 
-    getProblem (problemId) {
-      return Promise.resolve()
-    },
+function createEnlearn (app) {
+  const enlearn = app.options.enlearn.client
 
-    startProblem (problemId, metadata = null) {
-      return Promise.resolve()
-    },
+  const logStorePromise = createEventLogStore(app)
+  const problemStorePromise = createProblemStore(app)
 
-    recordStepResult (correct, metadata = null) {
-      return Promise.resolve()
-    },
+  return Promise.all([logStorePromise, problemStorePromise])
+    .then(values => {
+      const [logStore, problemStore] = values
 
-    recordProblemResult (completed, metadata = null) {
-      return Promise.resolve()
-    },
+      const eventLog = new enlearn.EventLog({
+        store: logStore,
+      })
 
-    selectScaffold (metadata = null) {
-      return Promise.resolve()
-    },
+      const ecosystem = new enlearn.Ecosystem({
+        localData: app.config.enlearnEcosystem,
+        eventLog: eventLog,
+        problemStore: problemStore,
+      })
 
-    recordScaffoldShown (scaffoldId, metadata = null) {
-      return Promise.resolve()
-    },
-  }
+      const policy = new enlearn.Policy({
+        localData: app.config.enlearnPolicy,
+      })
+
+      const client = new enlearn.AdaptiveClient({
+        ecosystem: ecosystem,
+        policy: policy,
+        eventLog: eventLog,
+        onBrainpoint: app.trigger.bind(app, 'brainpoint'),
+      })
+
+      return client.startSession().then(() => client)
+    })
 }
 
 export function setupPlugin (app) {
-  app.enlearn = createApi()
-  return Promise.resolve()
+  return createEnlearn(app)
+    .then(enlearn => { app.enlearn = enlearn })
 }
 
 export function teardownPlugin (app) {
-  delete app.enlearn
-  return Promise.resolve()
+  return app.enlearn.endSession()
+    .then(() => {
+      delete app.enlearn
+    })
 }
