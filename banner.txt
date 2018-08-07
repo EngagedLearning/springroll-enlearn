@@ -1,0 +1,4 @@
+SpringRoll-Enlearn <%= pkg.version %>
+https://github.com/engagedlearning/springroll-enlearn
+
+<%= data.license %>

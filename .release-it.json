@@ -1,0 +1,13 @@
+{
+  "safeBump": false,
+  "buildCommand": "yarn build && yarn test && git add --force springroll-enlearn.js",
+  "beforeChangelogCommand": "node scripts/update-changelog-version.js ${version}",
+  "changelogCommand": "node scripts/read-changelog.js ${version}",
+  "github": {
+    "release": true
+  },
+  "npm": {
+    "publish": true,
+    "access": "public"
+  }
+}

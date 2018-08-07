@@ -1,0 +1,58 @@
+{
+  "name": "@enlearn/springroll",
+  "version": "0.0.0",
+  "description": "SpringRoll plugin for the Enlearn platform.",
+  "license": "MIT",
+  "homepage": "https://github.com/engagedlearning/springroll-enlearn",
+  "bugs": "https://github.com/engagedlearning/springroll-enlearn/issues",
+  "repository": {
+    "url": "https://github.com:engagedlearning/springroll-enlearn",
+    "type": "git"
+  },
+  "main": "dist/springroll-enlearn.umd.js",
+  "module": "dist/springroll-enlearn.esm.js",
+  "peerDependencies": {
+    "springroll": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.4.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.7.0",
+    "changelog-parser": "^2.5.0",
+    "eslint": "^5.1.0",
+    "eslint-config-standard": "^12.0.0-alpha.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jest": "^21.17.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "husky": "^1.0.0-rc.13",
+    "jest": "^23.4.0",
+    "lint-staged": "^7.2.0",
+    "release-it": "^7.4.8",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.62.0",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-cleanup": "^3.0.0",
+    "rollup-plugin-license": "^0.7.0",
+    "rollup-plugin-node-resolve": "^3.3.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && rollup -c",
+    "lint": "eslint .",
+    "test": "jest",
+    "release-it": "release-it"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && yarn build && yarn test"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint . --fix",
+      "git add"
+    ]
+  }
+}
