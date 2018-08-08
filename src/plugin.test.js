@@ -81,6 +81,51 @@ test('setupPlugin creates app.enlearn', async () => {
   expect(adaptiveClient.startSession).toHaveBeenCalled()
 })
 
+function createAppForSetupFailures () {
+  return {
+    config: {
+      enlearnEcosystem: 'ecosystem data',
+      enlearnPolicy: 'policy data',
+    },
+    options: {
+      enlearn: {
+        apiKey: '12345',
+        client: {},
+      },
+    },
+  }
+}
+
+test('setupPlugin rejects with error if app.options.enlearn is not set', () => {
+  const app = createAppForSetupFailures()
+  delete app.options.enlearn
+  return expect(setupPlugin(app)).rejects.toThrow('Application must provide `enlearn` option object')
+})
+
+test('setupPlugin rejects with error if app.options.enlearn.apiKey is not set', () => {
+  const app = createAppForSetupFailures()
+  delete app.options.enlearn.apiKey
+  return expect(setupPlugin(app)).rejects.toThrow('Application must provide `enlearn.apiKey` option')
+})
+
+test('setupPlugin rejects with error if app.options.enlearn.client is not set', () => {
+  const app = createAppForSetupFailures()
+  delete app.options.enlearn.client
+  return expect(setupPlugin(app)).rejects.toThrow('Application must provide `enlearn.client` option')
+})
+
+test('setupPlugin rejects with error if app.config.enlearnEcosystem is not set', () => {
+  const app = createAppForSetupFailures()
+  delete app.config.enlearnEcosystem
+  return expect(setupPlugin(app)).rejects.toThrow('Application must provide `enlearnEcosystem` config value')
+})
+
+test('setupPlugin rejects with error if app.config.enlearnPolicy is not set', () => {
+  const app = createAppForSetupFailures()
+  delete app.config.enlearnPolicy
+  return expect(setupPlugin(app)).rejects.toThrow('Application must provide `enlearnPolicy` config value')
+})
+
 test('teardownPlugin deletes app.enlearn', async () => {
   const enlearn = {
     endSession: jest.fn().mockImplementation(() => Promise.resolve()),

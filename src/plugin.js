@@ -2,6 +2,22 @@ import { createEventLogStore } from './eventlogstore'
 import { createProblemStore } from './problemstore'
 
 function createEnlearn (app) {
+  if (!app.options.enlearn) {
+    return Promise.reject(new Error('Application must provide `enlearn` option object'))
+  }
+  if (!app.options.enlearn.apiKey) {
+    return Promise.reject(new Error('Application must provide `enlearn.apiKey` option'))
+  }
+  if (!app.options.enlearn.client) {
+    return Promise.reject(new Error('Application must provide `enlearn.client` option'))
+  }
+  if (!app.config.enlearnEcosystem) {
+    return Promise.reject(new Error('Application must provide `enlearnEcosystem` config value'))
+  }
+  if (!app.config.enlearnPolicy) {
+    return Promise.reject(new Error('Application must provide `enlearnPolicy` config value'))
+  }
+
   const enlearn = app.options.enlearn.client
 
   const logStorePromise = createEventLogStore(app)
