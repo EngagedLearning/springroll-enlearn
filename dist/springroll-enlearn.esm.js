@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.2.1
+ * SpringRoll-Enlearn 0.3.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -79,59 +79,49 @@ var UserDataEventLogStore = function () {
 }();
 UserDataEventLogStore.storeKey = 'enlearnEventLog';
 
-function createProblemStore(app) {
-  var store = new UserDataProblemStore(app.userData);
-  return store.initialize().then(function () {
-    return store;
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0;var v = c === 'x' ? r : r & 0x3 | 0x8;
+    return v.toString(16);
   });
 }
-var UserDataProblemStore = function () {
-  function UserDataProblemStore(userData) {
-    classCallCheck(this, UserDataProblemStore);
-    this._userData = userData;
-    this._problems = {};
-  }
-  UserDataProblemStore.prototype.initialize = function initialize() {
-    var _this = this;
-    return new Promise(function (resolve) {
-      _this._userData.read(UserDataProblemStore.storeKey, function (data) {
-        _this._problems = data || {};
-        resolve();
-      });
+function getStudentId(app) {
+  return new Promise(function (resolve) {
+    app.userData.read('studentId', function (data) {
+      if (data && data.studentId) {
+        resolve(data.studentId);
+      } else {
+        data = { studentId: uuid() };
+        app.userData.write('studentId', data, function () {
+          return resolve(data.studentId);
+        });
+      }
     });
-  };
-  UserDataProblemStore.prototype.getProblem = function getProblem(problemId) {
-    return Promise.resolve(this._problems[problemId] || null);
-  };
-  UserDataProblemStore.prototype.saveProblem = function saveProblem(problem) {
-    var _this2 = this;
-    this._problems[problem.id] = problem;
-    return new Promise(function (resolve) {
-      return _this2._userData.write(UserDataProblemStore.storeKey, _this2._problems, resolve);
-    });
-  };
-  return UserDataProblemStore;
-}();
-UserDataProblemStore.storeKey = 'enlearnProblemStore';
-
+  });
+}
 function createEnlearn(app) {
-  var enlearn = app.options.enlearn.client;
-  var logStorePromise = createEventLogStore(app);
-  var problemStorePromise = createProblemStore(app);
-  return Promise.all([logStorePromise, problemStorePromise]).then(function (values) {
+  if (!app.options.enlearn) {
+    return Promise.reject(new Error('Application must provide `enlearn` option object'));
+  }
+  if (!app.options.enlearn.apiKey) {
+    return Promise.reject(new Error('Application must provide `enlearn.apiKey` option'));
+  }
+  if (!app.options.enlearn.client) {
+    return Promise.reject(new Error('Application must provide `enlearn.client` option'));
+  }
+  if (!app.config.enlearnEcosystem) {
+    return Promise.reject(new Error('Application must provide `enlearnEcosystem` config value'));
+  }
+  if (!app.config.enlearnPolicy) {
+    return Promise.reject(new Error('Application must provide `enlearnPolicy` config value'));
+  }
+  return Promise.all([createEventLogStore(app), getStudentId(app)]).then(function (values) {
     var logStore = values[0],
-        problemStore = values[1];
-    var eventLog = new enlearn.EventLog({
-      store: logStore
-    });
-    var ecosystem = new enlearn.Ecosystem({
-      localData: app.config.enlearnEcosystem,
-      eventLog: eventLog,
-      problemStore: problemStore
-    });
-    var policy = new enlearn.Policy({
-      localData: app.config.enlearnPolicy
-    });
+        studentId = values[1];
+    var enlearn = app.options.enlearn.client;
+    var eventLog = new enlearn.EventLog(studentId, logStore);
+    var ecosystem = new enlearn.Ecosystem(app.config.enlearnEcosystem);
+    var policy = new enlearn.Policy(app.config.enlearnPolicy);
     var client = new enlearn.AdaptiveClient({
       ecosystem: ecosystem,
       policy: policy,
@@ -149,9 +139,11 @@ function setupPlugin(app) {
   });
 }
 function teardownPlugin(app) {
-  return app.enlearn.endSession().then(function () {
-    delete app.enlearn;
-  });
+  if (app.enlearn) {
+    return app.enlearn.endSession().then(function () {
+      delete app.enlearn;
+    });
+  }
 }
 
 (function () {
