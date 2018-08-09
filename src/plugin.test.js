@@ -1,22 +1,19 @@
 import { setupPlugin, teardownPlugin } from './plugin'
 
 import { createEventLogStore } from './eventlogstore'
-import { createProblemStore } from './problemstore'
 
 jest.mock('./eventlogstore')
-jest.mock('./problemstore')
 
 test('setupPlugin creates app.enlearn', async () => {
   const eventLogStore = 'event log store'
   createEventLogStore.mockImplementation(() => Promise.resolve(eventLogStore))
 
-  const problemStore = 'problem store'
-  createProblemStore.mockImplementation(() => Promise.resolve(problemStore))
-
   let eventLog
   let ecosystem
   let policy
   let adaptiveClient
+
+  const studentId = '0451'
 
   const app = {
     config: {
@@ -53,7 +50,14 @@ test('setupPlugin creates app.enlearn', async () => {
       },
     },
     userData: {
-      read (key, cb) { cb(null) },
+      read (key, cb) {
+        if (key === 'studentId') {
+          cb({ studentId })
+        } else {
+          cb(null)
+        }
+      },
+      write (key, data, cb) { cb() },
     },
     trigger: jest.fn(),
   }
@@ -62,15 +66,9 @@ test('setupPlugin creates app.enlearn', async () => {
 
   expect(app.enlearn).toEqual(adaptiveClient)
 
-  expect(eventLog.arguments).toEqual([{ store: eventLogStore }])
-  expect(ecosystem.arguments).toEqual([{
-    localData: app.config.enlearnEcosystem,
-    problemStore: problemStore,
-    eventLog: eventLog,
-  }])
-  expect(policy.arguments).toEqual([{
-    localData: app.config.enlearnPolicy,
-  }])
+  expect(eventLog.arguments).toEqual([studentId, eventLogStore])
+  expect(ecosystem.arguments).toEqual([app.config.enlearnEcosystem])
+  expect(policy.arguments).toEqual([app.config.enlearnPolicy])
   expect(adaptiveClient.arguments).toEqual([{
     ecosystem: ecosystem,
     policy: policy,
