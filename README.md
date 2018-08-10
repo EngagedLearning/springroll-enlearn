@@ -1,6 +1,10 @@
 # SpringRoll-Enlearn
 A [SpringRoll](http://springroll.io) plugin for the [Enlearn Platform](https://www.enlearn.org).
 
+## Installation
+The package is available on NPM as `@enlearn/springroll` and can be installed with NPM or Yarn.
+
+Alternatively you can download files directly from the [dist](dist) folder. If you plan to include a file directly into HTML without preprocessing, you would want the `.umd.js` version.
 
 ## Configuration
 The plugin requires some configuration in order to function. There are two components: application options and configuration files.
