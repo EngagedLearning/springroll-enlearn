@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## UNRELEASED
+## 0.4.0 - 2018-08-10
 ### Added
 - Forwards Learning Events to the Enlearn Client:
   - Event ID 7000 -> recordProblemStart
