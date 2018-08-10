@@ -20,6 +20,23 @@ function getStudentId (app) {
   })
 }
 
+export function handleLearningEvent (event, client) {
+  switch (event.event_id) {
+    case 7000: {
+      return client.recordProblemStart(event.event_data.problemId, event.event_data.metadata)
+    }
+    case 7001: {
+      return client.recordProblemEnd(event.event_data.problemId, event.event_data.completed, event.event_data.metadata)
+    }
+    case 7002: {
+      return client.recordStepEvidence(event.event_data.stepId, event.event_data.success, event.event_data.metadata)
+    }
+    case 7003: {
+      return client.recordScaffoldShown(event.event_data.stepId, event.event_data.scaffoldId, event.event_data.metadata)
+    }
+  }
+}
+
 function createEnlearn (app) {
   if (!app.options.enlearn) {
     return Promise.reject(new Error('Application must provide `enlearn` option object'))
@@ -50,7 +67,11 @@ function createEnlearn (app) {
         eventLog: eventLog,
         onBrainpoint: app.trigger.bind(app, 'brainpoint'),
       })
-      return client.startSession().then(() => client)
+      return client.startSession()
+        .then(() => {
+          app.on('learningEvent', event => handleLearningEvent(event, client))
+          return client
+        })
     })
 }
 
