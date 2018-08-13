@@ -6,25 +6,33 @@ export function createEventLogStore (app) {
 export class UserDataEventLogStore {
   constructor (userData) {
     this._userData = userData
-    this._records = []
+    this._events = []
   }
 
   initialize () {
     return new Promise(resolve => {
       this._userData.read(UserDataEventLogStore.storeKey, data => {
-        this._records = data || []
+        this._events = data || []
         resolve()
       })
     })
   }
 
-  addEventLogRecord (record) {
-    this._records.push(record)
-    return new Promise(resolve => this._userData.write(UserDataEventLogStore.storeKey, this._records, resolve))
+  getAllEvents () {
+    return Promise.resolve(this._events)
   }
 
-  getEventLogRecords () {
-    return Promise.resolve(this._records)
+  getEventsWithTypes (types) {
+    return Promise.resolve(this._events.filter(r => types.indexOf(r.type) >= 0))
+  }
+
+  getLatestEvent () {
+    return Promise.resolve(this._events.length > 0 ? this._events[this._events.length - 1] : null)
+  }
+
+  recordEvent (event) {
+    this._events.push(event)
+    return new Promise(resolve => this._userData.write(UserDataEventLogStore.storeKey, this._events, resolve))
   }
 }
 UserDataEventLogStore.storeKey = 'enlearnEventLog'

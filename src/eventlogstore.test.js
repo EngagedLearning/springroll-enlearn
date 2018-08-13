@@ -21,7 +21,7 @@ describe('UserDataEventLogStore', () => {
 
   test('records starts empty', () => {
     const { testObj } = setup()
-    return expect(testObj.getEventLogRecords()).resolves.toEqual([])
+    return expect(testObj.getLatestEvent()).resolves.toEqual(null)
   })
 
   test('initialize reads from user data', () => {
@@ -34,30 +34,54 @@ describe('UserDataEventLogStore', () => {
     expect(userData.read).toHaveBeenCalledWith('enlearnEventLog', expect.any(Function))
 
     const callback = userData.read.mock.calls[0][1]
-    callback([1, 2, 3])
+
+    const events = [
+      { type: 'a', value: 1 },
+      { type: 'a', value: 2 },
+      { type: 'a', value: 3 },
+    ]
+    callback(events)
 
     return promise.then(() => {
-      return expect(testObj.getEventLogRecords()).resolves.toEqual([1, 2, 3])
+      return expect(testObj.getAllEvents()).resolves.toEqual(events)
     })
   })
 
-  test('addEventLogRecord adds a record', () => {
+  test('getEventsWithTypes filters records by type', () => {
     const { testObj } = setup()
 
-    return testObj.addEventLogRecord(1)
-      .then(() => expect(testObj.getEventLogRecords()).resolves.toEqual([1]))
+    const events = [
+      { type: 'a', value: 1 },
+      { type: 'b', value: 2 },
+      { type: 'c', value: 3 },
+    ]
+
+    return expect(
+      testObj.recordEvent(events[0])
+        .then(() => testObj.recordEvent(events[1]))
+        .then(() => testObj.recordEvent(events[2]))
+        .then(() => testObj.getEventsWithTypes(['a', 'c']))
+    ).resolves.toEqual([events[0], events[2]])
   })
 
-  test('addEventLogRecord writes records to store', async () => {
+  test('recordEvent adds a record', () => {
+    const { testObj } = setup()
+
+    const event = { type: 'a', value: 'blah' }
+    return testObj.recordEvent(event)
+      .then(() => expect(testObj.getLatestEvent()).resolves.toEqual(event))
+  })
+
+  test('recordEvent writes records to store', async () => {
     const { testObj, userData } = setup()
 
-    await testObj.addEventLogRecord(1)
+    await testObj.recordEvent(1)
     expect(userData.write).toHaveBeenCalledWith('enlearnEventLog', [1], expect.any(Function))
 
-    await testObj.addEventLogRecord(2)
+    await testObj.recordEvent(2)
     expect(userData.write).toHaveBeenCalledWith('enlearnEventLog', [1, 2], expect.any(Function))
 
-    await testObj.addEventLogRecord(3)
+    await testObj.recordEvent(3)
     expect(userData.write).toHaveBeenCalledWith('enlearnEventLog', [1, 2, 3], expect.any(Function))
   })
 })
