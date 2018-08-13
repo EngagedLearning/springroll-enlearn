@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.4.0
+ * SpringRoll-Enlearn 0.5.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -54,26 +54,34 @@ var UserDataEventLogStore = function () {
   function UserDataEventLogStore(userData) {
     classCallCheck(this, UserDataEventLogStore);
     this._userData = userData;
-    this._records = [];
+    this._events = [];
   }
   UserDataEventLogStore.prototype.initialize = function initialize() {
     var _this = this;
     return new Promise(function (resolve) {
       _this._userData.read(UserDataEventLogStore.storeKey, function (data) {
-        _this._records = data || [];
+        _this._events = data || [];
         resolve();
       });
     });
   };
-  UserDataEventLogStore.prototype.addEventLogRecord = function addEventLogRecord(record) {
-    var _this2 = this;
-    this._records.push(record);
-    return new Promise(function (resolve) {
-      return _this2._userData.write(UserDataEventLogStore.storeKey, _this2._records, resolve);
-    });
+  UserDataEventLogStore.prototype.getAllEvents = function getAllEvents() {
+    return Promise.resolve(this._events);
   };
-  UserDataEventLogStore.prototype.getEventLogRecords = function getEventLogRecords() {
-    return Promise.resolve(this._records);
+  UserDataEventLogStore.prototype.getEventsWithTypes = function getEventsWithTypes(types) {
+    return Promise.resolve(this._events.filter(function (r) {
+      return types.indexOf(r.type) >= 0;
+    }));
+  };
+  UserDataEventLogStore.prototype.getLatestEvent = function getLatestEvent() {
+    return Promise.resolve(this._events.length > 0 ? this._events[this._events.length - 1] : null);
+  };
+  UserDataEventLogStore.prototype.recordEvent = function recordEvent(event) {
+    var _this2 = this;
+    this._events.push(event);
+    return new Promise(function (resolve) {
+      return _this2._userData.write(UserDataEventLogStore.storeKey, _this2._events, resolve);
+    });
   };
   return UserDataEventLogStore;
 }();
