@@ -19,7 +19,7 @@ export class UserDataEventLogStore {
   }
 
   getAllEvents () {
-    return Promise.resolve(this._events)
+    return Promise.resolve(this._events.slice())
   }
 
   getEventsWithTypes (types) {
