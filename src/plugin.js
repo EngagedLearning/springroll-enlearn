@@ -58,17 +58,11 @@ function createEnlearn (app) {
     .then(values => {
       const [logStore, studentId] = values
       const enlearn = app.options.enlearn.client
-      const eventLog = new enlearn.EventLog(studentId, logStore)
-      const ecosystem = new enlearn.Ecosystem(app.config.enlearnEcosystem)
-      const policy = new enlearn.Policy(app.config.enlearnPolicy)
-      const client = new enlearn.AdaptiveClient({
-        ecosystem: ecosystem,
-        policy: policy,
-        eventLog: eventLog,
-        onBrainpoint: app.trigger.bind(app, 'brainpoint'),
-      })
-      return client.startSession()
-        .then(() => {
+      const ecosystem = app.config.enlearnEcosystem
+      const policy = app.config.enlearnPolicy
+      const onBrainpoint = app.trigger.bind(app, 'brainpoint')
+      return enlearn.createEnlearnApi({ ecosystem, policy, logStore, onBrainpoint, studentId })
+        .then(client => {
           app.on('learningEvent', event => handleLearningEvent(event, client))
           return client
         })
@@ -77,6 +71,7 @@ function createEnlearn (app) {
 
 export function setupPlugin (app) {
   return createEnlearn(app)
+    .then(enlearn => enlearn.startSession().then(() => enlearn))
     .then(enlearn => { app.enlearn = enlearn })
 }
 

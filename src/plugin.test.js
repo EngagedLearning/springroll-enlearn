@@ -9,12 +9,10 @@ describe('setupPlugin', () => {
     const eventLogStore = 'event log store'
     createEventLogStore.mockImplementation(() => Promise.resolve(eventLogStore))
 
-    let eventLog
-    let ecosystem
-    let policy
-    let adaptiveClient
-
     const studentId = '0451'
+    const api = {
+      startSession: jest.fn().mockImplementation(() => Promise.resolve()),
+    }
 
     const app = {
       config: {
@@ -25,28 +23,7 @@ describe('setupPlugin', () => {
         enlearn: {
           apiKey: 'some api key',
           client: {
-            // mock constructors for objects in the Enlearn Client
-            EventLog () {
-              this.arguments = [...arguments]
-              eventLog = this
-              return this
-            },
-            Ecosystem () {
-              this.arguments = [...arguments]
-              ecosystem = this
-              return this
-            },
-            Policy () {
-              this.arguments = [...arguments]
-              policy = this
-              return this
-            },
-            AdaptiveClient () {
-              this.arguments = [...arguments]
-              this.startSession = jest.fn().mockImplementation(() => Promise.resolve())
-              adaptiveClient = this
-              return this
-            },
+            createEnlearnApi: jest.fn().mockImplementation(() => Promise.resolve(api)),
           },
         },
       },
@@ -66,19 +43,19 @@ describe('setupPlugin', () => {
 
     await setupPlugin(app)
 
-    expect(app.enlearn).toEqual(adaptiveClient)
+    expect(app.enlearn).toEqual(api)
 
-    expect(eventLog.arguments).toEqual([studentId, eventLogStore])
-    expect(ecosystem.arguments).toEqual([app.config.enlearnEcosystem])
-    expect(policy.arguments).toEqual([app.config.enlearnPolicy])
-    expect(adaptiveClient.arguments).toEqual([{
-      ecosystem: ecosystem,
-      policy: policy,
-      eventLog: eventLog,
-      onBrainpoint: expect.any(Function),
-    }])
+    expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith(
+      {
+        ecosystem: app.config.enlearnEcosystem,
+        policy: app.config.enlearnPolicy,
+        logStore: eventLogStore,
+        onBrainpoint: expect.any(Function),
+        studentId,
+      }
+    )
 
-    expect(adaptiveClient.startSession).toHaveBeenCalled()
+    expect(api.startSession).toHaveBeenCalled()
     expect(app.on).toHaveBeenCalledWith('learningEvent', expect.any(Function))
   })
 
