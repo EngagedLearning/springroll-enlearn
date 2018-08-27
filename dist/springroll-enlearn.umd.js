@@ -1,19 +1,19 @@
 /**
- * SpringRoll-Enlearn 0.5.0
+ * SpringRoll-Enlearn 0.6.0
  * https://github.com/engagedlearning/springroll-enlearn
- *
+ * 
  * Copyright © 2018. The Public Broadcasting Service (PBS).
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,12 +21,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
+ * 
  * The contents of this package were developed under a cooperative agreement
  * #PRU295A150003, from the U.S. Department of Education. However, these contents
  * do not necessarily represent the policy of the Department of Education, and
  * you should not assume endorsement by the Federal Government.
- *
+ * 
  * This Software was commissioned by and developed for PBS under contract with
  * Enlearn. This Software is intended to connect educational games developed by
  * third parties for PBS to Enlearn's proprietary educational learning software
@@ -72,7 +72,7 @@
       });
     };
     UserDataEventLogStore.prototype.getAllEvents = function getAllEvents() {
-      return Promise.resolve(this._events);
+      return Promise.resolve(this._events.slice());
     };
     UserDataEventLogStore.prototype.getEventsWithTypes = function getEventsWithTypes(types) {
       return Promise.resolve(this._events.filter(function (r) {
@@ -153,16 +153,10 @@
       var logStore = values[0],
           studentId = values[1];
       var enlearn = app.options.enlearn.client;
-      var eventLog = new enlearn.EventLog(studentId, logStore);
-      var ecosystem = new enlearn.Ecosystem(app.config.enlearnEcosystem);
-      var policy = new enlearn.Policy(app.config.enlearnPolicy);
-      var client = new enlearn.AdaptiveClient({
-        ecosystem: ecosystem,
-        policy: policy,
-        eventLog: eventLog,
-        onBrainpoint: app.trigger.bind(app, 'brainpoint')
-      });
-      return client.startSession().then(function () {
+      var ecosystem = app.config.enlearnEcosystem;
+      var policy = app.config.enlearnPolicy;
+      var onBrainpoint = app.trigger.bind(app, 'brainpoint');
+      return enlearn.createEnlearnApi({ ecosystem: ecosystem, policy: policy, logStore: logStore, onBrainpoint: onBrainpoint, studentId: studentId }).then(function (client) {
         app.on('learningEvent', function (event) {
           return handleLearningEvent(event, client);
         });
@@ -172,6 +166,10 @@
   }
   function setupPlugin(app) {
     return createEnlearn(app).then(function (enlearn) {
+      return enlearn.startSession().then(function () {
+        return enlearn;
+      });
+    }).then(function (enlearn) {
       app.enlearn = enlearn;
     });
   }
