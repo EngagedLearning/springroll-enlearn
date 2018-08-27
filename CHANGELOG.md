@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+### Changed
+- Updated to use Enlearn Client API 0.7.0
+
 ## 0.5.0 - 2018-08-13
 ### Changed
 - Updated event log store implementation to support Enlearn Client API 0.6.0
