@@ -62,17 +62,16 @@ function createEnlearn (app) {
       const policy = app.config.enlearnPolicy
       const onBrainpoint = app.trigger.bind(app, 'brainpoint')
       return enlearn.createEnlearnApi({ ecosystem, policy, logStore, onBrainpoint, studentId })
-        .then(client => {
-          app.on('learningEvent', event => handleLearningEvent(event, client))
-          return client
-        })
     })
 }
 
 export function setupPlugin (app) {
   return createEnlearn(app)
-    .then(enlearn => enlearn.startSession().then(() => enlearn))
-    .then(enlearn => { app.enlearn = enlearn })
+    .then(api => {
+      app.enlearn = api
+      app.on('learningEvent', event => handleLearningEvent(event, api))
+      return api.startSession()
+    })
 }
 
 export function teardownPlugin (app) {
