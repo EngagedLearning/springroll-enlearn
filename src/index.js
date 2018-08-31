@@ -17,14 +17,16 @@ import { setupPlugin, teardownPlugin } from './plugin'
     return setupPlugin(this)
       .then(done)
       .catch(err => {
-        console.error(`Error initializing Enlearn plugin: ${err}`)
+        console.error('Error initializing Enlearn plugin:')
+        console.error(err)
       })
   }
 
   plugin.teardown = function () {
     teardownPlugin(this)
       .catch(err => {
-        console.error(`Error shutting down Enlearn plugin: ${err}`)
+        console.error('Error shutting down Enlearn plugin')
+        console.error(err)
       })
   }
 })()

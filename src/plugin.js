@@ -1,4 +1,5 @@
-import { createEventLogStore } from './eventlogstore'
+import { UserDataEventLogStore } from './userdata'
+// import { ClientAnalyticsEventLogStore } from './clientanalytics'
 
 function uuid () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -18,6 +19,16 @@ function getStudentId (app) {
       }
     })
   })
+}
+
+export function createEventLogStore (app) {
+  let store
+  // if (app.clientAnalytics) {
+  //   store = new ClientAnalyticsEventLogStore(app.clientAnalytics)
+  // } else {
+  store = new UserDataEventLogStore(app.userData)
+  // }
+  return store.initialize().then(() => store)
 }
 
 export function handleLearningEvent (event, client) {
@@ -77,5 +88,7 @@ export function setupPlugin (app) {
 export function teardownPlugin (app) {
   if (app.enlearn) {
     return app.enlearn.endSession().then(() => { delete app.enlearn })
+  } else {
+    return Promise.resolve()
   }
 }

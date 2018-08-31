@@ -1,14 +1,14 @@
-import { setupPlugin, teardownPlugin, handleLearningEvent } from './plugin'
-
-import { createEventLogStore } from './eventlogstore'
-
-jest.mock('./eventlogstore')
+import {
+  setupPlugin,
+  teardownPlugin,
+  handleLearningEvent,
+  createEventLogStore,
+} from './plugin'
+import { UserDataEventLogStore } from './userdata'
+// import { ClientAnalyticsEventLogStore } from './clientanalytics'
 
 describe('setupPlugin', () => {
   test('creates app.enlearn', async () => {
-    const eventLogStore = 'event log store'
-    createEventLogStore.mockImplementation(() => Promise.resolve(eventLogStore))
-
     const studentId = '0451'
     const api = {
       startSession: jest.fn().mockImplementation(() => Promise.resolve()),
@@ -49,7 +49,7 @@ describe('setupPlugin', () => {
       {
         ecosystem: app.config.enlearnEcosystem,
         policy: app.config.enlearnPolicy,
-        logStore: eventLogStore,
+        logStore: expect.any(UserDataEventLogStore),
         onBrainpoint: expect.any(Function),
         studentId,
       }
@@ -117,6 +117,11 @@ describe('teardownPlugin', () => {
     expect(enlearn.endSession).toHaveBeenCalled()
     expect(app.enlearn).not.toBeDefined()
   })
+
+  test('returns promise if app is not set', async () => {
+    const app = {}
+    expect(teardownPlugin(app)).toBeInstanceOf(Promise)
+  })
 })
 
 describe('handleLearningEvent', () => {
@@ -181,5 +186,26 @@ describe('handleLearningEvent', () => {
     }
     handleLearningEvent(event, client)
     expect(client.recordScaffoldShown).toHaveBeenCalledWith('12345', '0451', 'cats')
+  })
+})
+
+describe('createEventLogStore', () => {
+  // test('returns promise that resolves to ClientAnalyticsEventLogStore if app has clientAnalytics', () => {
+  //   const app = {
+  //     clientAnalytics: {
+  //       createCollection: () => Promise.resolve(),
+  //       registerQuery: () => Promise.resolve()
+  //     }
+  //   }
+  //   return expect(createEventLogStore(app)).resolves.toBeInstanceOf(ClientAnalyticsEventLogStore)
+  // })
+
+  test('returns promise that resolves to UserDataEventLogStore if app does not have clientAnalytics', () => {
+    const app = {
+      userData: {
+        read: (key, cb) => { cb(null) },
+      },
+    }
+    return expect(createEventLogStore(app)).resolves.toBeInstanceOf(UserDataEventLogStore)
   })
 })
