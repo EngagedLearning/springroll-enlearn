@@ -5,7 +5,7 @@ import {
   createEventLogStore,
 } from './plugin'
 import { UserDataEventLogStore } from './userdata'
-// import { ClientAnalyticsEventLogStore } from './clientanalytics'
+import { ClientAnalyticsEventLogStore } from './clientanalytics'
 
 describe('setupPlugin', () => {
   test('creates app.enlearn', async () => {
@@ -190,15 +190,15 @@ describe('handleLearningEvent', () => {
 })
 
 describe('createEventLogStore', () => {
-  // test('returns promise that resolves to ClientAnalyticsEventLogStore if app has clientAnalytics', () => {
-  //   const app = {
-  //     clientAnalytics: {
-  //       createCollection: () => Promise.resolve(),
-  //       registerQuery: () => Promise.resolve()
-  //     }
-  //   }
-  //   return expect(createEventLogStore(app)).resolves.toBeInstanceOf(ClientAnalyticsEventLogStore)
-  // })
+  test('returns promise that resolves to ClientAnalyticsEventLogStore if app has clientAnalytics', () => {
+    const app = {
+      clientAnalytics: {
+        createCollection: () => Promise.resolve(),
+        registerQuery: () => Promise.resolve(),
+      },
+    }
+    return expect(createEventLogStore(app)).resolves.toBeInstanceOf(ClientAnalyticsEventLogStore)
+  })
 
   test('returns promise that resolves to UserDataEventLogStore if app does not have clientAnalytics', () => {
     const app = {
