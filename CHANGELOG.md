@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+### Added
+- Apps using client analytics will use that API to store event logs
+
 ## 0.6.0 - 2018-08-27
 ### Changed
 - Updated to use Enlearn Client API 0.7.0
