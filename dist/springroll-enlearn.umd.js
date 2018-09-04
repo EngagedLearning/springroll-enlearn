@@ -1,19 +1,19 @@
 /**
- * SpringRoll-Enlearn 0.6.0
+ * SpringRoll-Enlearn 0.7.0
  * https://github.com/engagedlearning/springroll-enlearn
- * 
+ *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,12 +21,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  * The contents of this package were developed under a cooperative agreement
  * #PRU295A150003, from the U.S. Department of Education. However, these contents
  * do not necessarily represent the policy of the Department of Education, and
  * you should not assume endorsement by the Federal Government.
- * 
+ *
  * This Software was commissioned by and developed for PBS under contract with
  * Enlearn. This Software is intended to connect educational games developed by
  * third parties for PBS to Enlearn's proprietary educational learning software
@@ -50,12 +50,7 @@
     }
   };
 
-  function createEventLogStore(app) {
-    var store = new UserDataEventLogStore(app.userData);
-    return store.initialize().then(function () {
-      return store;
-    });
-  }
+  var UD_STORE_KEY = 'enlearnEventLog';
   var UserDataEventLogStore = function () {
     function UserDataEventLogStore(userData) {
       classCallCheck(this, UserDataEventLogStore);
@@ -65,7 +60,7 @@
     UserDataEventLogStore.prototype.initialize = function initialize() {
       var _this = this;
       return new Promise(function (resolve) {
-        _this._userData.read(UserDataEventLogStore.storeKey, function (data) {
+        _this._userData.read(UD_STORE_KEY, function (data) {
           _this._events = data || [];
           resolve();
         });
@@ -74,11 +69,6 @@
     UserDataEventLogStore.prototype.getAllEvents = function getAllEvents() {
       return Promise.resolve(this._events.slice());
     };
-    UserDataEventLogStore.prototype.getEventsWithTypes = function getEventsWithTypes(types) {
-      return Promise.resolve(this._events.filter(function (r) {
-        return types.indexOf(r.type) >= 0;
-      }));
-    };
     UserDataEventLogStore.prototype.getLatestEvent = function getLatestEvent() {
       return Promise.resolve(this._events.length > 0 ? this._events[this._events.length - 1] : null);
     };
@@ -86,12 +76,44 @@
       var _this2 = this;
       this._events.push(event);
       return new Promise(function (resolve) {
-        return _this2._userData.write(UserDataEventLogStore.storeKey, _this2._events, resolve);
+        return _this2._userData.write(UD_STORE_KEY, _this2._events, resolve);
       });
     };
     return UserDataEventLogStore;
   }();
-  UserDataEventLogStore.storeKey = 'enlearnEventLog';
+
+  var CA_COLLECTION = 'enlearnEventLog';
+  var CA_QUERY_ALL = 'getAllEvents';
+  var CA_QUERY_LATEST = 'getLatestEvent';
+  var ClientAnalyticsEventLogStore = function () {
+    function ClientAnalyticsEventLogStore(clientAnalytics) {
+      classCallCheck(this, ClientAnalyticsEventLogStore);
+      this._ca = clientAnalytics;
+    }
+    ClientAnalyticsEventLogStore.prototype.initialize = function initialize() {
+      var _this = this;
+      return this._ca.createCollection(CA_COLLECTION).then(function () {
+        return _this._ca.registerQuery(CA_QUERY_ALL, function (collection) {
+          return collection.chain().simplesort('recordTime', false).simplesort('sequenceNumber', false).data();
+        });
+      }).then(function () {
+        return _this._ca.registerQuery(CA_QUERY_LATEST, function (collection) {
+          var results = collection.chain().simplesort('recordTime', true).simplesort('sequenceNumber', true).limit(1).data();
+          return results.length > 0 ? results[0] : null;
+        });
+      });
+    };
+    ClientAnalyticsEventLogStore.prototype.getAllEvents = function getAllEvents() {
+      return this._ca.query(CA_QUERY_ALL, {}, CA_COLLECTION);
+    };
+    ClientAnalyticsEventLogStore.prototype.getLatestEvent = function getLatestEvent() {
+      return this._ca.query(CA_QUERY_LATEST, {}, CA_COLLECTION);
+    };
+    ClientAnalyticsEventLogStore.prototype.recordEvent = function recordEvent(event) {
+      return this._ca.insert(CA_COLLECTION, event);
+    };
+    return ClientAnalyticsEventLogStore;
+  }();
 
   function uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -111,6 +133,17 @@
           });
         }
       });
+    });
+  }
+  function createEventLogStore(app) {
+    var store = void 0;
+    if (app.clientAnalytics) {
+      store = new ClientAnalyticsEventLogStore(app.clientAnalytics);
+    } else {
+      store = new UserDataEventLogStore(app.userData);
+    }
+    return store.initialize().then(function () {
+      return store;
     });
   }
   function handleLearningEvent(event, client) {
@@ -156,21 +189,16 @@
       var ecosystem = app.config.enlearnEcosystem;
       var policy = app.config.enlearnPolicy;
       var onBrainpoint = app.trigger.bind(app, 'brainpoint');
-      return enlearn.createEnlearnApi({ ecosystem: ecosystem, policy: policy, logStore: logStore, onBrainpoint: onBrainpoint, studentId: studentId }).then(function (client) {
-        app.on('learningEvent', function (event) {
-          return handleLearningEvent(event, client);
-        });
-        return client;
-      });
+      return enlearn.createEnlearnApi({ ecosystem: ecosystem, policy: policy, logStore: logStore, onBrainpoint: onBrainpoint, studentId: studentId });
     });
   }
   function setupPlugin(app) {
-    return createEnlearn(app).then(function (enlearn) {
-      return enlearn.startSession().then(function () {
-        return enlearn;
+    return createEnlearn(app).then(function (api) {
+      app.enlearn = api;
+      app.on('learningEvent', function (event) {
+        return handleLearningEvent(event, api);
       });
-    }).then(function (enlearn) {
-      app.enlearn = enlearn;
+      return api.startSession();
     });
   }
   function teardownPlugin(app) {
@@ -178,6 +206,8 @@
       return app.enlearn.endSession().then(function () {
         delete app.enlearn;
       });
+    } else {
+      return Promise.resolve();
     }
   }
 
@@ -193,12 +223,14 @@
     };
     plugin.preload = function (done) {
       return setupPlugin(this).then(done).catch(function (err) {
-        console.error('Error initializing Enlearn plugin: ' + err);
+        console.error('Error initializing Enlearn plugin:');
+        console.error(err);
       });
     };
     plugin.teardown = function () {
       teardownPlugin(this).catch(function (err) {
-        console.error('Error shutting down Enlearn plugin: ' + err);
+        console.error('Error shutting down Enlearn plugin');
+        console.error(err);
       });
     };
   })();
