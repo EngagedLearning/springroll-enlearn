@@ -3,7 +3,7 @@
 
 module.exports = {
   clearMocks: true,
-  rootDir: 'src',
-  testEnvironment: 'jsdom',
-  testURL: 'http://localhost',
-}
+  rootDir: "src",
+  testEnvironment: "jsdom",
+  testURL: "http://localhost",
+};

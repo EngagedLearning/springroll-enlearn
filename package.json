@@ -14,38 +14,13 @@
   "files": [
     "dist/*.js"
   ],
-  "peerDependencies": {
-    "springroll": "^1.1.0"
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-jest": "^23.4.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
-    "changelog-parser": "^2.5.0",
-    "eslint": "^5.1.0",
-    "eslint-config-standard": "^12.0.0-alpha.0",
-    "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-jest": "^21.17.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "husky": "^1.0.0-rc.13",
-    "jest": "^23.4.0",
-    "lint-staged": "^7.2.0",
-    "release-it": "^7.4.8",
-    "rimraf": "^2.6.2",
-    "rollup": "^0.62.0",
-    "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-cleanup": "^3.0.0",
-    "rollup-plugin-license": "^0.7.0",
-    "rollup-plugin-node-resolve": "^3.3.0"
-  },
   "scripts": {
     "build": "rimraf dist && rollup -c",
     "lint": "eslint .",
-    "test": "jest",
-    "release-it": "release-it"
+    "lint:fix": "yarn lint --fix",
+    "prettier": "prettier --write * .* **/*",
+    "release-it": "release-it",
+    "test": "jest"
   },
   "husky": {
     "hooks": {
@@ -53,9 +28,41 @@
     }
   },
   "lint-staged": {
-    "*.js": [
-      "eslint . --fix",
+    "!**.js": [
+      "prettier --write",
+      "git add"
+    ],
+    "**.js": [
+      "prettier --write",
+      "eslint --fix",
       "git add"
     ]
+  },
+  "peerDependencies": {
+    "springroll": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-core": "^7.0.0-0",
+    "babel-jest": "^23.4.2",
+    "changelog-parser": "^2.5.0",
+    "eslint": "^5.5.0",
+    "eslint-config-prettier": "^3.0.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.22.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "husky": "^1.0.0-rc.13",
+    "jest": "^23.5.0",
+    "lint-staged": "^7.2.2",
+    "prettier": "^1.14.2",
+    "release-it": "^7.6.1",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.65.2",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-cleanup": "^3.0.0",
+    "rollup-plugin-license": "^0.7.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-terser": "^2.0.2"
   }
 }

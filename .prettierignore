@@ -1,0 +1,8 @@
+dist/
+node_modules/
+LICENSE
+banner.txt
+yarn-*.log
+yarn.lock
+.editorconfig
+.*ignore

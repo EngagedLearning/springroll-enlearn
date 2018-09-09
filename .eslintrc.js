@@ -1,44 +1,45 @@
-const OFF = 0
-const ERROR = 2
+const OFF = 0;
+const ERROR = 2;
 
 module.exports = {
   root: true,
   parserOptions: {
+    sourceType: "module",
     ecmaVersion: 2015,
   },
   env: {
     browser: true,
     es6: true,
   },
-  plugins: [
-    'jest',
-  ],
+  plugins: ["jest", "promise"],
   extends: [
-    'standard',
+    "prettier",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:promise/recommended",
+    "plugin:jest/recommended",
   ],
   rules: {
-    'array-bracket-spacing': [ERROR, 'never'],
-    'comma-dangle': [ERROR, 'always-multiline'],
-    'no-console': [ERROR, { allow: ['warn', 'error'] }],
-    'object-curly-spacing': [ERROR, 'always'],
-    'quote-props': [ERROR, 'consistent-as-needed'],
-    'standard/no-callback-literal': OFF,
+    "no-console": [ERROR, { allow: ["warn", "error"] }],
   },
   overrides: [
     {
-      files: ['*.test.js'],
+      files: ["*.test.js"],
       parserOptions: {
         ecmaVersion: 2017,
       },
       env: {
-        'jest/globals': true,
+        "jest/globals": true,
       },
     },
     {
-      files: ['scripts/*.js'],
+      files: ["scripts/*.js"],
+      parserOptions: {
+        sourceType: "script",
+      },
       rules: {
-        'no-console': OFF,
+        "no-console": OFF,
       },
     },
   ],
-}
+};
