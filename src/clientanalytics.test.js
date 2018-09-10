@@ -53,6 +53,6 @@ test("recordEvent runs insert", async () => {
   const { testObj, clientAnalytics } = setup();
   await testObj.recordEvent({ a: 1 });
   expect(clientAnalytics.insert).toHaveBeenCalledWith("enlearnEventLog", {
-    a: 1,
+    event: { a: 1 },
   });
 });

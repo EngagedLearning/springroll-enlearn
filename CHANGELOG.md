@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+
+### Changed
+
+- Client Analytics log store wraps event objects to ensure we don't conflict with LokiJS owned fields
+
 ## 0.7.0 - 2018-09-04
 
 ### Added

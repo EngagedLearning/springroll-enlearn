@@ -16,7 +16,8 @@ export class ClientAnalyticsEventLogStore {
             .chain()
             .simplesort("recordTime", false)
             .simplesort("sequenceNumber", false)
-            .data();
+            .data()
+            .map(r => r.event);
         })
       )
       .then(() =>
@@ -26,7 +27,8 @@ export class ClientAnalyticsEventLogStore {
             .simplesort("recordTime", true)
             .simplesort("sequenceNumber", true)
             .limit(1)
-            .data();
+            .data()
+            .map(r => r.event);
           return results.length > 0 ? results[0] : null;
         })
       );
@@ -41,6 +43,6 @@ export class ClientAnalyticsEventLogStore {
   }
 
   recordEvent(event) {
-    return this._ca.insert(CA_COLLECTION, event);
+    return this._ca.insert(CA_COLLECTION, { event });
   }
 }
