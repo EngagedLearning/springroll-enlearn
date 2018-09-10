@@ -13,6 +13,7 @@ module.exports = {
   },
   plugins: ["jest", "promise"],
   extends: [
+    "eslint:recommended",
     "prettier",
     "plugin:import/errors",
     "plugin:import/warnings",
@@ -33,9 +34,25 @@ module.exports = {
       },
     },
     {
-      files: ["scripts/*.js"],
+      files: ["rollup.config.js"],
+      env: {
+        browser: false,
+        node: true,
+      },
+    },
+    {
+      files: [
+        ".eslintrc.js",
+        "jest.config.js",
+        "prettier.config.js",
+        "scripts/*.js",
+      ],
       parserOptions: {
         sourceType: "script",
+      },
+      env: {
+        browser: false,
+        node: true,
       },
       rules: {
         "no-console": OFF,
