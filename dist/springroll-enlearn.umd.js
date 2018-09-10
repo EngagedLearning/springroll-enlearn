@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.7.0
+ * SpringRoll-Enlearn 0.8.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -44,20 +44,15 @@
   (factory());
 }(this, (function () { 'use strict';
 
-  var classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  };
-
-  var UD_STORE_KEY = 'enlearnEventLog';
-  var UserDataEventLogStore = function () {
+  var UD_STORE_KEY = "enlearnEventLog";
+  var UserDataEventLogStore =
+  function () {
     function UserDataEventLogStore(userData) {
-      classCallCheck(this, UserDataEventLogStore);
       this._userData = userData;
       this._events = [];
     }
-    UserDataEventLogStore.prototype.initialize = function initialize() {
+    var _proto = UserDataEventLogStore.prototype;
+    _proto.initialize = function initialize() {
       var _this = this;
       return new Promise(function (resolve) {
         _this._userData.read(UD_STORE_KEY, function (data) {
@@ -66,13 +61,13 @@
         });
       });
     };
-    UserDataEventLogStore.prototype.getAllEvents = function getAllEvents() {
+    _proto.getAllEvents = function getAllEvents() {
       return Promise.resolve(this._events.slice());
     };
-    UserDataEventLogStore.prototype.getLatestEvent = function getLatestEvent() {
+    _proto.getLatestEvent = function getLatestEvent() {
       return Promise.resolve(this._events.length > 0 ? this._events[this._events.length - 1] : null);
     };
-    UserDataEventLogStore.prototype.recordEvent = function recordEvent(event) {
+    _proto.recordEvent = function recordEvent(event) {
       var _this2 = this;
       this._events.push(event);
       return new Promise(function (resolve) {
@@ -82,53 +77,63 @@
     return UserDataEventLogStore;
   }();
 
-  var CA_COLLECTION = 'enlearnEventLog';
-  var CA_QUERY_ALL = 'getAllEvents';
-  var CA_QUERY_LATEST = 'getLatestEvent';
-  var ClientAnalyticsEventLogStore = function () {
+  var CA_COLLECTION = "enlearnEventLog";
+  var CA_QUERY_ALL = "getAllEvents";
+  var CA_QUERY_LATEST = "getLatestEvent";
+  var ClientAnalyticsEventLogStore =
+  function () {
     function ClientAnalyticsEventLogStore(clientAnalytics) {
-      classCallCheck(this, ClientAnalyticsEventLogStore);
       this._ca = clientAnalytics;
     }
-    ClientAnalyticsEventLogStore.prototype.initialize = function initialize() {
+    var _proto = ClientAnalyticsEventLogStore.prototype;
+    _proto.initialize = function initialize() {
       var _this = this;
       return this._ca.createCollection(CA_COLLECTION).then(function () {
         return _this._ca.registerQuery(CA_QUERY_ALL, function (collection) {
-          return collection.chain().simplesort('recordTime', false).simplesort('sequenceNumber', false).data();
+          return collection.chain().simplesort("recordTime", false).simplesort("sequenceNumber", false).data().map(function (r) {
+            return r.event;
+          });
         });
       }).then(function () {
         return _this._ca.registerQuery(CA_QUERY_LATEST, function (collection) {
-          var results = collection.chain().simplesort('recordTime', true).simplesort('sequenceNumber', true).limit(1).data();
+          var results = collection.chain().simplesort("recordTime", true).simplesort("sequenceNumber", true).limit(1).data().map(function (r) {
+            return r.event;
+          });
           return results.length > 0 ? results[0] : null;
         });
       });
     };
-    ClientAnalyticsEventLogStore.prototype.getAllEvents = function getAllEvents() {
+    _proto.getAllEvents = function getAllEvents() {
       return this._ca.query(CA_QUERY_ALL, {}, CA_COLLECTION);
     };
-    ClientAnalyticsEventLogStore.prototype.getLatestEvent = function getLatestEvent() {
+    _proto.getLatestEvent = function getLatestEvent() {
       return this._ca.query(CA_QUERY_LATEST, {}, CA_COLLECTION);
     };
-    ClientAnalyticsEventLogStore.prototype.recordEvent = function recordEvent(event) {
-      return this._ca.insert(CA_COLLECTION, event);
+    _proto.recordEvent = function recordEvent(event) {
+      return this._ca.insert(CA_COLLECTION, {
+        event: event
+      });
     };
     return ClientAnalyticsEventLogStore;
   }();
 
   function uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0;var v = c === 'x' ? r : r & 0x3 | 0x8;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      var v = c === "x" ? r : r & 0x3 | 0x8;
       return v.toString(16);
     });
   }
   function getStudentId(app) {
     return new Promise(function (resolve) {
-      app.userData.read('studentId', function (data) {
+      app.userData.read("studentId", function (data) {
         if (data && data.studentId) {
           resolve(data.studentId);
         } else {
-          data = { studentId: uuid() };
-          app.userData.write('studentId', data, function () {
+          data = {
+            studentId: uuid()
+          };
+          app.userData.write("studentId", data, function () {
             return resolve(data.studentId);
           });
         }
@@ -136,7 +141,7 @@
     });
   }
   function createEventLogStore(app) {
-    var store = void 0;
+    var store;
     if (app.clientAnalytics) {
       store = new ClientAnalyticsEventLogStore(app.clientAnalytics);
     } else {
@@ -168,19 +173,19 @@
   }
   function createEnlearn(app) {
     if (!app.options.enlearn) {
-      return Promise.reject(new Error('Application must provide `enlearn` option object'));
+      return Promise.reject(new Error("Application must provide `enlearn` option object"));
     }
     if (!app.options.enlearn.apiKey) {
-      return Promise.reject(new Error('Application must provide `enlearn.apiKey` option'));
+      return Promise.reject(new Error("Application must provide `enlearn.apiKey` option"));
     }
     if (!app.options.enlearn.client) {
-      return Promise.reject(new Error('Application must provide `enlearn.client` option'));
+      return Promise.reject(new Error("Application must provide `enlearn.client` option"));
     }
     if (!app.config.enlearnEcosystem) {
-      return Promise.reject(new Error('Application must provide `enlearnEcosystem` config value'));
+      return Promise.reject(new Error("Application must provide `enlearnEcosystem` config value"));
     }
     if (!app.config.enlearnPolicy) {
-      return Promise.reject(new Error('Application must provide `enlearnPolicy` config value'));
+      return Promise.reject(new Error("Application must provide `enlearnPolicy` config value"));
     }
     return Promise.all([createEventLogStore(app), getStudentId(app)]).then(function (values) {
       var logStore = values[0],
@@ -188,14 +193,20 @@
       var enlearn = app.options.enlearn.client;
       var ecosystem = app.config.enlearnEcosystem;
       var policy = app.config.enlearnPolicy;
-      var onBrainpoint = app.trigger.bind(app, 'brainpoint');
-      return enlearn.createEnlearnApi({ ecosystem: ecosystem, policy: policy, logStore: logStore, onBrainpoint: onBrainpoint, studentId: studentId });
+      var onBrainpoint = app.trigger.bind(app, "brainpoint");
+      return enlearn.createEnlearnApi({
+        ecosystem: ecosystem,
+        policy: policy,
+        logStore: logStore,
+        onBrainpoint: onBrainpoint,
+        studentId: studentId
+      });
     });
   }
   function setupPlugin(app) {
     return createEnlearn(app).then(function (api) {
       app.enlearn = api;
-      app.on('learningEvent', function (event) {
+      app.on("learningEvent", function (event) {
         return handleLearningEvent(event, api);
       });
       return api.startSession();
@@ -203,33 +214,35 @@
   }
   function teardownPlugin(app) {
     if (app.enlearn) {
-      return app.enlearn.endSession().then(function () {
-        delete app.enlearn;
-      });
+      var enlearn = app.enlearn;
+      delete app.enlearn;
+      return enlearn.endSession();
     } else {
       return Promise.resolve();
     }
   }
 
   (function () {
-    var ApplicationPlugin = window.include('springroll.ApplicationPlugin');
+    var ApplicationPlugin = window.include("springroll.ApplicationPlugin");
     var plugin = new ApplicationPlugin();
     plugin.setup = function () {
       var enlearnOptions = {
         apiKey: null,
         client: null
       };
-      this.options.add('enlearn', enlearnOptions);
+      this.options.add("enlearn", enlearnOptions);
     };
     plugin.preload = function (done) {
-      return setupPlugin(this).then(done).catch(function (err) {
-        console.error('Error initializing Enlearn plugin:');
+      return setupPlugin(this).then(function () {
+        return setTimeout(done, 0);
+      }).catch(function (err) {
+        console.error("Error initializing Enlearn plugin:");
         console.error(err);
       });
     };
     plugin.teardown = function () {
       teardownPlugin(this).catch(function (err) {
-        console.error('Error shutting down Enlearn plugin');
+        console.error("Error shutting down Enlearn plugin");
         console.error(err);
       });
     };
