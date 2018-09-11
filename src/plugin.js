@@ -95,14 +95,11 @@ function createEnlearn(app) {
     values => {
       const [logStore, studentId] = values;
       const enlearn = app.options.enlearn.client;
-      const ecosystem = app.config.enlearnEcosystem;
-      const policy = app.config.enlearnPolicy;
-      const onBrainpoint = app.trigger.bind(app, "brainpoint");
       return enlearn.createEnlearnApi({
-        ecosystem,
-        policy,
+        apiKey: app.options.enlearn.apiKey,
+        ecosystem: app.config.enlearnEcosystem,
+        policy: app.config.enlearnPolicy,
         logStore,
-        onBrainpoint,
         studentId,
       });
     }

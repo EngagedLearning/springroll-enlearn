@@ -41,7 +41,6 @@ describe("setupPlugin", () => {
           cb();
         },
       },
-      trigger: jest.fn(),
       on: jest.fn(),
     };
 
@@ -50,10 +49,10 @@ describe("setupPlugin", () => {
     expect(app.enlearn).toEqual(api);
 
     expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith({
+      apiKey: "some api key",
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       logStore: expect.any(UserDataEventLogStore),
-      onBrainpoint: expect.any(Function),
       studentId,
     });
 

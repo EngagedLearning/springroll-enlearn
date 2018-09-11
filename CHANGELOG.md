@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+
+### Changed
+
+- Removing unused `onBrainpoint` callback and adding `apiKey` to call to `createEnlearnApi`
+
 ## 0.8.0 - 2018-09-10
 
 ### Changed
