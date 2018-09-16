@@ -28,31 +28,20 @@ export function createEventLogStore(app) {
 export function handleLearningEvent(event, client) {
   switch (event.event_id) {
     case 7000: {
-      return client.recordProblemStart(
-        event.event_data.problemId,
-        event.event_data.metadata
-      );
+      const { problemId, appData } = event.event_data;
+      return client.recordProblemStart(problemId, appData);
     }
     case 7001: {
-      return client.recordProblemEnd(
-        event.event_data.problemId,
-        event.event_data.completed,
-        event.event_data.metadata
-      );
+      const { problemId, completed, appData } = event.event_data;
+      return client.recordProblemEnd(problemId, completed, appData);
     }
     case 7002: {
-      return client.recordStepEvidence(
-        event.event_data.stepId,
-        event.event_data.success,
-        event.event_data.metadata
-      );
+      const { stepId, evidence, appData } = event.event_data;
+      return client.recordStepEvidence(stepId, evidence, appData);
     }
     case 7003: {
-      return client.recordScaffoldShown(
-        event.event_data.stepId,
-        event.event_data.scaffoldId,
-        event.event_data.metadata
-      );
+      const { stepId, scaffoldId, appData } = event.event_data;
+      return client.recordScaffoldShown(stepId, scaffoldId, appData);
     }
     default:
       return Promise.resolve();

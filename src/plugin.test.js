@@ -144,7 +144,7 @@ describe("handleLearningEvent", () => {
       event_id: 7000,
       event_data: {
         problemId: "12345",
-        metadata: "cats",
+        appData: "cats",
       },
     };
     handleLearningEvent(event, client);
@@ -160,7 +160,7 @@ describe("handleLearningEvent", () => {
       event_data: {
         problemId: "12345",
         completed: false,
-        metadata: "cats",
+        appData: "cats",
       },
     };
     handleLearningEvent(event, client);
@@ -179,14 +179,14 @@ describe("handleLearningEvent", () => {
       event_id: 7002,
       event_data: {
         stepId: "12345",
-        success: false,
-        metadata: "cats",
+        evidence: "correct",
+        appData: "cats",
       },
     };
     handleLearningEvent(event, client);
     expect(client.recordStepEvidence).toHaveBeenCalledWith(
       "12345",
-      false,
+      "correct",
       "cats"
     );
   });
@@ -200,7 +200,7 @@ describe("handleLearningEvent", () => {
       event_data: {
         stepId: "12345",
         scaffoldId: "0451",
-        metadata: "cats",
+        appData: "cats",
       },
     };
     handleLearningEvent(event, client);

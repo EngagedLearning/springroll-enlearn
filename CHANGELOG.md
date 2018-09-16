@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com) and this pr
 ### Changed
 
 - Removing unused `onBrainpoint` callback and adding `apiKey` to call to `createEnlearnApi`
+- Changed expected fields on learning events to match API calls:
+  - All: `metadata` → `appData`
+  - Step evidence: `success` → `evidence`
 
 ## 0.8.0 - 2018-09-10
 
