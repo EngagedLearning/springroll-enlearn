@@ -122,14 +122,14 @@ describe("teardownPlugin", () => {
       endSession: jest.fn().mockImplementation(() => Promise.resolve()),
     };
     const app = {
-      enlearn: enlearn,
+      enlearn,
     };
     await teardownPlugin(app);
     expect(enlearn.endSession).toHaveBeenCalled();
     expect(app.enlearn).not.toBeDefined();
   });
 
-  test("returns promise if app is not set", async () => {
+  test("returns promise if app is not set", () => {
     const app = {};
     expect(teardownPlugin(app)).toBeInstanceOf(Promise);
   });

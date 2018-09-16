@@ -7,5 +7,5 @@ function fatalError(message) {
 
 module.exports = {
   changelogPath: path.join(__dirname, "../CHANGELOG.md"),
-  fatalError: fatalError,
+  fatalError,
 };

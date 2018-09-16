@@ -1,5 +1,5 @@
-const moment = require("moment");
 const fs = require("fs");
+const moment = require("moment");
 const { changelogPath, fatalError } = require("./helpers");
 
 if (process.argv.length < 3) {
@@ -8,23 +8,26 @@ if (process.argv.length < 3) {
 
 const releasingVersion = process.argv[2];
 
-fs.readFile(changelogPath, "utf8", (err, data) => {
-  if (err) {
-    fatalError(`Failed to read changelog: ${err}`);
+fs.readFile(changelogPath, "utf8", (readError, changelog) => {
+  if (readError) {
+    fatalError(`Failed to read changelog: ${readError}`);
   }
 
-  if (data.indexOf("## UNRELEASED") < 0) {
+  if (changelog.indexOf("## UNRELEASED") < 0) {
     fatalError(
       "Changelog does not contain an UNRELEASED section. Please add one with the appropriate notes."
     );
   }
 
   const date = moment().format("YYYY-MM-DD");
-  data = data.replace("## UNRELEASED", `## ${releasingVersion} - ${date}`);
+  changelog = changelog.replace(
+    "## UNRELEASED",
+    `## ${releasingVersion} - ${date}`
+  );
 
-  fs.writeFile(changelogPath, data, err => {
-    if (err) {
-      fatalError(`Failed to write changelog: ${err}`);
+  fs.writeFile(changelogPath, changelog, writeError => {
+    if (writeError) {
+      fatalError(`Failed to write changelog: ${writeError}`);
     }
   });
 });

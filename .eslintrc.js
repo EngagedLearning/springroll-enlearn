@@ -1,6 +1,3 @@
-const OFF = 0;
-const ERROR = 2;
-
 module.exports = {
   root: true,
   parserOptions: {
@@ -11,18 +8,8 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  plugins: ["jest", "promise"],
-  extends: [
-    "eslint:recommended",
-    "prettier",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:promise/recommended",
-    "plugin:jest/recommended",
-  ],
-  rules: {
-    "no-console": [ERROR, { allow: ["warn", "error"] }],
-  },
+  plugins: ["jest"],
+  extends: ["@enlearn", "plugin:jest/recommended"],
   overrides: [
     {
       files: ["*.test.js"],
@@ -55,7 +42,7 @@ module.exports = {
         node: true,
       },
       rules: {
-        "no-console": OFF,
+        "no-console": "off",
       },
     },
   ],

@@ -1,6 +1,6 @@
+import uuid from "uuid/v4";
 import { UserDataEventLogStore } from "./userdata";
 import { ClientAnalyticsEventLogStore } from "./clientanalytics";
-import uuid from "uuid/v4";
 
 function getStudentId(app) {
   return new Promise(resolve => {
@@ -54,6 +54,8 @@ export function handleLearningEvent(event, client) {
         event.event_data.metadata
       );
     }
+    default:
+      return Promise.resolve();
   }
 }
 
@@ -112,7 +114,6 @@ export function teardownPlugin(app) {
     const enlearn = app.enlearn;
     delete app.enlearn;
     return enlearn.endSession();
-  } else {
-    return Promise.resolve();
   }
+  return Promise.resolve();
 }
