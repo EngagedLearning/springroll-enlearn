@@ -6,9 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com) and this pr
 
 ## UNRELEASED
 
+### Added
+
+- `apiKey` is now passed to `createEnlearnApi`
+
 ### Changed
 
-- Removing unused `onBrainpoint` callback and adding `apiKey` to call to `createEnlearnApi`
+- `onBrainpoint` callback is no longer passed to `createEnlearnApi` because it wasn't used
 - Changed expected fields on learning events to match API calls:
   - All: `metadata` → `appData`
   - Step evidence: `success` → `evidence`
