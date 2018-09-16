@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.8.0
+ * SpringRoll-Enlearn 0.9.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -37,6 +37,68 @@
  * provide adaptivity for your educational software to the Enlearn Software,
  * please contact Enlearn: https://www.enlearn.org/contact.
  */
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var rngBrowser = createCommonjsModule(function (module) {
+var getRandomValues = (typeof(crypto) != 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto)) ||
+                      (typeof(msCrypto) != 'undefined' && typeof window.msCrypto.getRandomValues == 'function' && msCrypto.getRandomValues.bind(msCrypto));
+if (getRandomValues) {
+  var rnds8 = new Uint8Array(16);
+  module.exports = function whatwgRNG() {
+    getRandomValues(rnds8);
+    return rnds8;
+  };
+} else {
+  var rnds = new Array(16);
+  module.exports = function mathRNG() {
+    for (var i = 0, r; i < 16; i++) {
+      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+    }
+    return rnds;
+  };
+}
+});
+
+var byteToHex = [];
+for (var i = 0; i < 256; ++i) {
+  byteToHex[i] = (i + 0x100).toString(16).substr(1);
+}
+function bytesToUuid(buf, offset) {
+  var i = offset || 0;
+  var bth = byteToHex;
+  return ([bth[buf[i++]], bth[buf[i++]],
+	bth[buf[i++]], bth[buf[i++]], '-',
+	bth[buf[i++]], bth[buf[i++]], '-',
+	bth[buf[i++]], bth[buf[i++]], '-',
+	bth[buf[i++]], bth[buf[i++]], '-',
+	bth[buf[i++]], bth[buf[i++]],
+	bth[buf[i++]], bth[buf[i++]],
+	bth[buf[i++]], bth[buf[i++]]]).join('');
+}
+var bytesToUuid_1 = bytesToUuid;
+
+function v4(options, buf, offset) {
+  var i = buf && offset || 0;
+  if (typeof(options) == 'string') {
+    buf = options === 'binary' ? new Array(16) : null;
+    options = null;
+  }
+  options = options || {};
+  var rnds = options.random || (options.rng || rngBrowser)();
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+  if (buf) {
+    for (var ii = 0; ii < 16; ++ii) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+  return buf || bytesToUuid_1(rnds);
+}
+var v4_1 = v4;
 
 var UD_STORE_KEY = "enlearnEventLog";
 var UserDataEventLogStore =
@@ -111,13 +173,6 @@ function () {
   return ClientAnalyticsEventLogStore;
 }();
 
-function uuid() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0;
-    var v = c === "x" ? r : r & 0x3 | 0x8;
-    return v.toString(16);
-  });
-}
 function getStudentId(app) {
   return new Promise(function (resolve) {
     app.userData.read("studentId", function (data) {
@@ -125,7 +180,7 @@ function getStudentId(app) {
         resolve(data.studentId);
       } else {
         data = {
-          studentId: uuid()
+          studentId: v4_1()
         };
         app.userData.write("studentId", data, function () {
           return resolve(data.studentId);
@@ -149,20 +204,37 @@ function handleLearningEvent(event, client) {
   switch (event.event_id) {
     case 7000:
       {
-        return client.recordProblemStart(event.event_data.problemId, event.event_data.metadata);
+        var _event$event_data = event.event_data,
+            problemId = _event$event_data.problemId,
+            appData = _event$event_data.appData;
+        return client.recordProblemStart(problemId, appData);
       }
     case 7001:
       {
-        return client.recordProblemEnd(event.event_data.problemId, event.event_data.completed, event.event_data.metadata);
+        var _event$event_data2 = event.event_data,
+            _problemId = _event$event_data2.problemId,
+            completed = _event$event_data2.completed,
+            _appData = _event$event_data2.appData;
+        return client.recordProblemEnd(_problemId, completed, _appData);
       }
     case 7002:
       {
-        return client.recordStepEvidence(event.event_data.stepId, event.event_data.success, event.event_data.metadata);
+        var _event$event_data3 = event.event_data,
+            stepId = _event$event_data3.stepId,
+            evidence = _event$event_data3.evidence,
+            _appData2 = _event$event_data3.appData;
+        return client.recordStepEvidence(stepId, evidence, _appData2);
       }
     case 7003:
       {
-        return client.recordScaffoldShown(event.event_data.stepId, event.event_data.scaffoldId, event.event_data.metadata);
+        var _event$event_data4 = event.event_data,
+            _stepId = _event$event_data4.stepId,
+            scaffoldId = _event$event_data4.scaffoldId,
+            _appData3 = _event$event_data4.appData;
+        return client.recordScaffoldShown(_stepId, scaffoldId, _appData3);
       }
+    default:
+      return Promise.resolve();
   }
 }
 function createEnlearn(app) {
@@ -185,14 +257,11 @@ function createEnlearn(app) {
     var logStore = values[0],
         studentId = values[1];
     var enlearn = app.options.enlearn.client;
-    var ecosystem = app.config.enlearnEcosystem;
-    var policy = app.config.enlearnPolicy;
-    var onBrainpoint = app.trigger.bind(app, "brainpoint");
     return enlearn.createEnlearnApi({
-      ecosystem: ecosystem,
-      policy: policy,
+      apiKey: app.options.enlearn.apiKey,
+      ecosystem: app.config.enlearnEcosystem,
+      policy: app.config.enlearnPolicy,
       logStore: logStore,
-      onBrainpoint: onBrainpoint,
       studentId: studentId
     });
   });
@@ -211,9 +280,8 @@ function teardownPlugin(app) {
     var enlearn = app.enlearn;
     delete app.enlearn;
     return enlearn.endSession();
-  } else {
-    return Promise.resolve();
   }
+  return Promise.resolve();
 }
 
 (function () {
