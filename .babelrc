@@ -3,9 +3,6 @@
     [
       "@babel/preset-env",
       {
-        "targets": {
-          "browsers": ["iOS >= 9", "Android >= 4.2", "IE >= 11"]
-        },
         "modules": false,
         "spec": false,
         "loose": true
@@ -18,9 +15,6 @@
         [
           "@babel/preset-env",
           {
-            "targets": {
-              "browsers": ["iOS >= 9", "Android >= 4.2", "IE >= 11"]
-            },
             "spec": false,
             "loose": true
           }
