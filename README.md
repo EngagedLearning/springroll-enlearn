@@ -8,6 +8,10 @@ The package is available on NPM as `@enlearn/springroll` and can be installed wi
 
 Alternatively you can download files directly from the [dist](dist) folder. If you plan to include a file directly into HTML without preprocessing, you would want the `.umd.js` version.
 
+## Promises
+
+This package uses the ES6 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) type for asynchronous operations. To conserve size in the package, users of the library targetting environments without support for Promises must include a polyfill such as [promise-polyfill](https://www.npmjs.com/package/promise-polyfill).
+
 ## Configuration
 
 The plugin requires some configuration in order to function. There are two components: application options and configuration files.
