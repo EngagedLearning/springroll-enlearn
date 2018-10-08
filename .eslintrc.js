@@ -30,6 +30,7 @@ module.exports = {
     {
       files: [
         ".eslintrc.js",
+        "babel.config.js",
         "jest.config.js",
         "prettier.config.js",
         "scripts/*.js",

@@ -18,7 +18,7 @@
     "build": "rimraf dist && rollup -c",
     "lint": "eslint .",
     "lint:fix": "yarn lint --fix",
-    "prettier": "prettier --write * .* **/*",
+    "prettier": "prettier --write \"**/*.md\" \"**/*.js\" \"**/*.json\"",
     "release-it": "release-it",
     "test": "jest"
   },
