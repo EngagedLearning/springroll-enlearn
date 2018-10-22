@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.9.0
+ * SpringRoll-Enlearn 0.9.1
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -152,13 +152,13 @@
 	    var _this = this;
 	    return this._ca.createCollection(CA_COLLECTION).then(function () {
 	      return _this._ca.registerQuery(CA_QUERY_ALL, function (collection) {
-	        return collection.chain().simplesort("recordTime", false).simplesort("sequenceNumber", false).data().map(function (r) {
+	        return collection.chain().simplesort("event.sequenceNumber", false).data().map(function (r) {
 	          return r.event;
 	        });
 	      });
 	    }).then(function () {
 	      return _this._ca.registerQuery(CA_QUERY_LATEST, function (collection) {
-	        var results = collection.chain().simplesort("recordTime", true).simplesort("sequenceNumber", true).limit(1).data().map(function (r) {
+	        var results = collection.chain().simplesort("event.sequenceNumber", true).limit(1).data().map(function (r) {
 	          return r.event;
 	        });
 	        return results.length > 0 ? results[0] : null;
