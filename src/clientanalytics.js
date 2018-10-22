@@ -14,8 +14,7 @@ export class ClientAnalyticsEventLogStore {
         this._ca.registerQuery(CA_QUERY_ALL, collection => {
           return collection
             .chain()
-            .simplesort("recordTime", false)
-            .simplesort("sequenceNumber", false)
+            .simplesort("event.sequenceNumber", false)
             .data()
             .map(r => r.event);
         })
@@ -24,8 +23,7 @@ export class ClientAnalyticsEventLogStore {
         this._ca.registerQuery(CA_QUERY_LATEST, collection => {
           const results = collection
             .chain()
-            .simplesort("recordTime", true)
-            .simplesort("sequenceNumber", true)
+            .simplesort("event.sequenceNumber", true)
             .limit(1)
             .data()
             .map(r => r.event);
