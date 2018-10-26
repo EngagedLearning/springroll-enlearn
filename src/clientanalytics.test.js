@@ -1,6 +1,6 @@
-import { ClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createClientAnalyticsEventLogStore } from "./clientanalytics";
 
-function setup() {
+const setup = async () => {
   const clientAnalytics = {
     createCollection: jest.fn().mockImplementation(() => Promise.resolve()),
     registerQuery: jest.fn().mockImplementation(() => Promise.resolve()),
@@ -8,14 +8,12 @@ function setup() {
     insert: jest.fn().mockImplementation(() => Promise.resolve()),
   };
 
-  const testObj = new ClientAnalyticsEventLogStore(clientAnalytics);
-
+  const testObj = await createClientAnalyticsEventLogStore(clientAnalytics);
   return { testObj, clientAnalytics };
-}
+};
 
 test("initialize creates collection and registers queries", async () => {
-  const { testObj, clientAnalytics } = setup();
-  await testObj.initialize();
+  const { clientAnalytics } = await setup();
   expect(clientAnalytics.createCollection).toHaveBeenCalledWith(
     "enlearnEventLog"
   );
@@ -24,13 +22,17 @@ test("initialize creates collection and registers queries", async () => {
     expect.any(Function)
   );
   expect(clientAnalytics.registerQuery).toHaveBeenCalledWith(
-    "getLatestEvent",
+    "getEventsToUpload",
+    expect.any(Function)
+  );
+  expect(clientAnalytics.registerQuery).toHaveBeenCalledWith(
+    "markEventsAsUploaded",
     expect.any(Function)
   );
 });
 
 test("getAllEvents runs correct query", async () => {
-  const { testObj, clientAnalytics } = setup();
+  const { testObj, clientAnalytics } = await setup();
   await testObj.getAllEvents();
   expect(clientAnalytics.query).toHaveBeenCalledWith(
     "getAllEvents",
@@ -39,20 +41,31 @@ test("getAllEvents runs correct query", async () => {
   );
 });
 
-test("getLatestEvent runs correct query", async () => {
-  const { testObj, clientAnalytics } = setup();
-  await testObj.getLatestEvent();
+test("getEventsToUpload runs correct query", async () => {
+  const { testObj, clientAnalytics } = await setup();
+  await testObj.getEventsToUpload();
   expect(clientAnalytics.query).toHaveBeenCalledWith(
-    "getLatestEvent",
+    "getEventsToUpload",
     {},
     "enlearnEventLog"
   );
 });
 
-test("recordEvent runs insert", async () => {
-  const { testObj, clientAnalytics } = setup();
+test("markEventsAsUploaded runs correct query", async () => {
+  const { testObj, clientAnalytics } = await setup();
+  await testObj.markEventsAsUploaded();
+  expect(clientAnalytics.query).toHaveBeenCalledWith(
+    "markEventsAsUploaded",
+    {},
+    "enlearnEventLog"
+  );
+});
+
+test("recordEvent inserts event and initial uploaded flag set to false", async () => {
+  const { testObj, clientAnalytics } = await setup();
   await testObj.recordEvent({ a: 1 });
   expect(clientAnalytics.insert).toHaveBeenCalledWith("enlearnEventLog", {
     event: { a: 1 },
+    uploaded: false,
   });
 });

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+
+### Added
+
+- Plugin supports `apiOverride` option which is passed to `createEnlearnApi` to allow for passing in a different API server. This is primarily for testing and shipping games should have have this value set.
+- Event log stores are updated to support Enlearn Client API 0.14.0 which now uploads events to the Enlearn API.
+
 ## 0.9.1 - 2018-10-22
 
 ### Fixed

@@ -4,8 +4,23 @@ import {
   handleLearningEvent,
   createEventLogStore,
 } from "./plugin";
-import { UserDataEventLogStore } from "./userdata";
-import { ClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createUserDataEventLogStore } from "./userdata";
+import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+
+jest.mock("./userdata");
+jest.mock("./clientanalytics");
+
+const mockUserDataEventStore = {};
+const mockClientAnalyticsEventStore = {};
+
+beforeAll(() => {
+  createUserDataEventLogStore.mockImplementation(() =>
+    Promise.resolve(mockUserDataEventStore)
+  );
+  createClientAnalyticsEventLogStore.mockImplementation(() =>
+    Promise.resolve(mockClientAnalyticsEventStore)
+  );
+});
 
 describe("setupPlugin", () => {
   test("creates app.enlearn", async () => {
@@ -22,6 +37,7 @@ describe("setupPlugin", () => {
       options: {
         enlearn: {
           apiKey: "some api key",
+          apiOverride: "some other API server",
           client: {
             createEnlearnApi: jest
               .fn()
@@ -50,9 +66,10 @@ describe("setupPlugin", () => {
 
     expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith({
       apiKey: "some api key",
+      apiOverride: "some other API server",
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
-      logStore: expect.any(UserDataEventLogStore),
+      logStore: expect.any(Object),
       studentId,
     });
 
@@ -60,20 +77,18 @@ describe("setupPlugin", () => {
     expect(app.on).toHaveBeenCalledWith("learningEvent", expect.any(Function));
   });
 
-  function createAppForSetupFailures() {
-    return {
-      config: {
-        enlearnEcosystem: "ecosystem data",
-        enlearnPolicy: "policy data",
+  const createAppForSetupFailures = () => ({
+    config: {
+      enlearnEcosystem: "ecosystem data",
+      enlearnPolicy: "policy data",
+    },
+    options: {
+      enlearn: {
+        apiKey: "12345",
+        client: {},
       },
-      options: {
-        enlearn: {
-          apiKey: "12345",
-          client: {},
-        },
-      },
-    };
-  }
+    },
+  });
 
   test("rejects with error if app.options.enlearn is not set", () => {
     const app = createAppForSetupFailures();
@@ -213,19 +228,20 @@ describe("handleLearningEvent", () => {
 });
 
 describe("createEventLogStore", () => {
-  test("returns promise that resolves to ClientAnalyticsEventLogStore if app has clientAnalytics", () => {
+  test("returns promise that resolves to client analytics store if app has clientAnalytics", () => {
     const app = {
       clientAnalytics: {
         createCollection: () => Promise.resolve(),
         registerQuery: () => Promise.resolve(),
       },
     };
-    return expect(createEventLogStore(app)).resolves.toBeInstanceOf(
-      ClientAnalyticsEventLogStore
+
+    expect(createEventLogStore(app)).resolves.toBe(
+      mockClientAnalyticsEventStore
     );
   });
 
-  test("returns promise that resolves to UserDataEventLogStore if app does not have clientAnalytics", () => {
+  test("returns promise that resolves to user data store if app does not have clientAnalytics", () => {
     const app = {
       userData: {
         read: (key, cb) => {
@@ -233,8 +249,7 @@ describe("createEventLogStore", () => {
         },
       },
     };
-    return expect(createEventLogStore(app)).resolves.toBeInstanceOf(
-      UserDataEventLogStore
-    );
+
+    expect(createEventLogStore(app)).resolves.toBe(mockUserDataEventStore);
   });
 });

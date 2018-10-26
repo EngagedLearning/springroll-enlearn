@@ -1,34 +1,49 @@
-const UD_STORE_KEY = "enlearnEventLog";
+const EVENTS_KEY = "enlearnEventLog";
+const NOT_UPLOADED_KEY = "enlearnEventLogNotUploaded";
 
-export class UserDataEventLogStore {
-  constructor(userData) {
-    this._userData = userData;
-    this._events = [];
-  }
+export const createUserDataEventLogStore = userData => {
+  let events = [];
+  let notUploadedIds = [];
 
-  initialize() {
-    return new Promise(resolve => {
-      this._userData.read(UD_STORE_KEY, data => {
-        this._events = data || [];
+  const getAllEvents = () => Promise.resolve(events.slice());
+
+  const recordEvent = event => {
+    events.push(event);
+    notUploadedIds.push(event.id);
+    return new Promise(resolve =>
+      userData.write(EVENTS_KEY, events, () => {
+        userData.write(NOT_UPLOADED_KEY, notUploadedIds, resolve);
+      })
+    );
+  };
+
+  const getEventsToUpload = () =>
+    Promise.resolve(events.filter(e => notUploadedIds.indexOf(e.id) >= 0));
+
+  const markEventsAsUploaded = eventIds => {
+    notUploadedIds = notUploadedIds.filter(id => eventIds.indexOf(id) < 0);
+    return new Promise(resolve =>
+      userData.write(NOT_UPLOADED_KEY, notUploadedIds, resolve)
+    );
+  };
+
+  return Promise.all([
+    new Promise(resolve => {
+      userData.read(EVENTS_KEY, data => {
+        events = data || [];
         resolve();
       });
-    });
-  }
-
-  getAllEvents() {
-    return Promise.resolve(this._events.slice());
-  }
-
-  getLatestEvent() {
-    return Promise.resolve(
-      this._events.length > 0 ? this._events[this._events.length - 1] : null
-    );
-  }
-
-  recordEvent(event) {
-    this._events.push(event);
-    return new Promise(resolve =>
-      this._userData.write(UD_STORE_KEY, this._events, resolve)
-    );
-  }
-}
+    }),
+    new Promise(resolve => {
+      userData.read(NOT_UPLOADED_KEY, data => {
+        notUploadedIds = data || [];
+        resolve();
+      });
+    }),
+  ]).then(() => ({
+    getAllEvents,
+    recordEvent,
+    getEventsToUpload,
+    markEventsAsUploaded,
+  }));
+};

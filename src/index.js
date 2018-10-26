@@ -8,6 +8,7 @@ import { setupPlugin, teardownPlugin } from "./plugin";
   plugin.setup = function() {
     const enlearnOptions = {
       apiKey: null,
+      apiOverride: null,
       client: null,
     };
     this.options.add("enlearn", enlearnOptions);

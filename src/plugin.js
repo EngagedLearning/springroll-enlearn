@@ -1,8 +1,8 @@
 import uuid from "uuid/v4";
-import { UserDataEventLogStore } from "./userdata";
-import { ClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createUserDataEventLogStore } from "./userdata";
+import { createClientAnalyticsEventLogStore } from "./clientanalytics";
 
-function getStudentId(app) {
+const getStudentId = app => {
   return new Promise(resolve => {
     app.userData.read("studentId", data => {
       if (data && data.studentId) {
@@ -13,19 +13,16 @@ function getStudentId(app) {
       }
     });
   });
-}
+};
 
-export function createEventLogStore(app) {
-  let store;
+export const createEventLogStore = app => {
   if (app.clientAnalytics) {
-    store = new ClientAnalyticsEventLogStore(app.clientAnalytics);
-  } else {
-    store = new UserDataEventLogStore(app.userData);
+    return createClientAnalyticsEventLogStore(app.clientAnalytics);
   }
-  return store.initialize().then(() => store);
-}
+  return createUserDataEventLogStore(app.userData);
+};
 
-export function handleLearningEvent(event, client) {
+export const handleLearningEvent = (event, client) => {
   switch (event.event_id) {
     case 7000: {
       const { problemId, appData } = event.event_data;
@@ -46,9 +43,9 @@ export function handleLearningEvent(event, client) {
     default:
       return Promise.resolve();
   }
-}
+};
 
-function createEnlearn(app) {
+const createEnlearn = app => {
   if (!app.options.enlearn) {
     return Promise.reject(
       new Error("Application must provide `enlearn` option object")
@@ -78,9 +75,10 @@ function createEnlearn(app) {
   return Promise.all([createEventLogStore(app), getStudentId(app)]).then(
     values => {
       const [logStore, studentId] = values;
-      const enlearn = app.options.enlearn.client;
-      return enlearn.createEnlearnApi({
-        apiKey: app.options.enlearn.apiKey,
+      const { apiKey, apiOverride, client } = app.options.enlearn;
+      return client.createEnlearnApi({
+        apiKey,
+        apiOverride,
         ecosystem: app.config.enlearnEcosystem,
         policy: app.config.enlearnPolicy,
         logStore,
@@ -88,21 +86,21 @@ function createEnlearn(app) {
       });
     }
   );
-}
+};
 
-export function setupPlugin(app) {
+export const setupPlugin = app => {
   return createEnlearn(app).then(api => {
     app.enlearn = api;
     app.on("learningEvent", event => handleLearningEvent(event, api));
     return api.startSession();
   });
-}
+};
 
-export function teardownPlugin(app) {
+export const teardownPlugin = app => {
   if (app.enlearn) {
     const enlearn = app.enlearn;
     delete app.enlearn;
     return enlearn.endSession();
   }
   return Promise.resolve();
-}
+};
