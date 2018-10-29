@@ -1,6 +1,6 @@
 {
   "name": "@enlearn/springroll",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "SpringRoll plugin for the Enlearn platform.",
   "license": "MIT",
   "homepage": "https://github.com/engagedlearning/springroll-enlearn",
