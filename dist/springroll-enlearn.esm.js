@@ -296,12 +296,10 @@ var createEnlearn = function createEnlearn(app) {
     var _app$options$enlearn = app.options.enlearn,
         apiKey = _app$options$enlearn.apiKey,
         apiOverride = _app$options$enlearn.apiOverride,
-        client = _app$options$enlearn.client,
-        appData = _app$options$enlearn.appData;
+        client = _app$options$enlearn.client;
     return client.createEnlearnApi({
       apiKey: apiKey,
       apiOverride: apiOverride,
-      appData: appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       logStore: logStore,
@@ -334,8 +332,7 @@ var teardownPlugin = function teardownPlugin(app) {
     var enlearnOptions = {
       apiKey: null,
       apiOverride: null,
-      client: null,
-      appData: {}
+      client: null
     };
     this.options.add("enlearn", enlearnOptions);
   };
