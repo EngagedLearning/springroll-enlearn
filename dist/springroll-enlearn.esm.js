@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.10.0
+ * SpringRoll-Enlearn 0.11.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -296,10 +296,12 @@ var createEnlearn = function createEnlearn(app) {
     var _app$options$enlearn = app.options.enlearn,
         apiKey = _app$options$enlearn.apiKey,
         apiOverride = _app$options$enlearn.apiOverride,
-        client = _app$options$enlearn.client;
+        client = _app$options$enlearn.client,
+        appData = _app$options$enlearn.appData;
     return client.createEnlearnApi({
       apiKey: apiKey,
       apiOverride: apiOverride,
+      appData: appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       logStore: logStore,
@@ -332,7 +334,8 @@ var teardownPlugin = function teardownPlugin(app) {
     var enlearnOptions = {
       apiKey: null,
       apiOverride: null,
-      client: null
+      client: null,
+      appData: {}
     };
     this.options.add("enlearn", enlearnOptions);
   };
