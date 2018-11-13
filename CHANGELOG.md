@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+
+### Added
+
+- Plugin supports `appData` option which is a set of application specific values that are logged with each event in the Enlearn API. This removes the need to pass constant values to each API call made by the game.
+
 ## 0.10.0 - 2018-10-29
 
 ### Added

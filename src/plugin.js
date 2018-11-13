@@ -75,10 +75,11 @@ const createEnlearn = app => {
   return Promise.all([createEventLogStore(app), getStudentId(app)]).then(
     values => {
       const [logStore, studentId] = values;
-      const { apiKey, apiOverride, client } = app.options.enlearn;
+      const { apiKey, apiOverride, client, appData } = app.options.enlearn;
       return client.createEnlearnApi({
         apiKey,
         apiOverride,
+        appData,
         ecosystem: app.config.enlearnEcosystem,
         policy: app.config.enlearnPolicy,
         logStore,

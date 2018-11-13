@@ -10,6 +10,7 @@ import { setupPlugin, teardownPlugin } from "./plugin";
       apiKey: null,
       apiOverride: null,
       client: null,
+      appData: {},
     };
     this.options.add("enlearn", enlearnOptions);
   };

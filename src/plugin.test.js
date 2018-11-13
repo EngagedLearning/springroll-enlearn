@@ -28,6 +28,10 @@ describe("setupPlugin", () => {
     const api = {
       startSession: jest.fn().mockImplementation(() => Promise.resolve()),
     };
+    const appData = {
+      releaseBuild: true,
+      someOtherValue: 99,
+    };
 
     const app = {
       config: {
@@ -38,6 +42,7 @@ describe("setupPlugin", () => {
         enlearn: {
           apiKey: "some api key",
           apiOverride: "some other API server",
+          appData,
           client: {
             createEnlearnApi: jest
               .fn()
@@ -67,6 +72,7 @@ describe("setupPlugin", () => {
     expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith({
       apiKey: "some api key",
       apiOverride: "some other API server",
+      appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       logStore: expect.any(Object),
