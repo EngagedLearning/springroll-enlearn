@@ -1,6 +1,5 @@
 import uuid from "uuid/v4";
-import { createUserDataEventLogStore } from "./userdata";
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createEventLogStore } from "./log-store";
 
 const getStudentId = app => {
   return new Promise(resolve => {
@@ -13,13 +12,6 @@ const getStudentId = app => {
       }
     });
   });
-};
-
-export const createEventLogStore = app => {
-  if (app.clientAnalytics) {
-    return createClientAnalyticsEventLogStore(app.clientAnalytics);
-  }
-  return createUserDataEventLogStore(app.userData);
 };
 
 export const handleLearningEvent = (event, client) => {

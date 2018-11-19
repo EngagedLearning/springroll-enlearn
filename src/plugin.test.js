@@ -1,24 +1,13 @@
-import {
-  setupPlugin,
-  teardownPlugin,
-  handleLearningEvent,
-  createEventLogStore,
-} from "./plugin";
-import { createUserDataEventLogStore } from "./userdata";
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { setupPlugin, teardownPlugin, handleLearningEvent } from "./plugin";
+import { createEventLogStore } from "./log-store";
 
-jest.mock("./userdata");
-jest.mock("./clientanalytics");
+jest.mock("./log-store");
 
-const mockUserDataEventStore = {};
-const mockClientAnalyticsEventStore = {};
+const mockEventLogStore = { myStore: true };
 
 beforeAll(() => {
-  createUserDataEventLogStore.mockImplementation(() =>
-    Promise.resolve(mockUserDataEventStore)
-  );
-  createClientAnalyticsEventLogStore.mockImplementation(() =>
-    Promise.resolve(mockClientAnalyticsEventStore)
+  createEventLogStore.mockImplementation(() =>
+    Promise.resolve(mockEventLogStore)
   );
 });
 
@@ -241,32 +230,5 @@ describe("handleLearningEvent", () => {
       "0451",
       "cats"
     );
-  });
-});
-
-describe("createEventLogStore", () => {
-  test("returns promise that resolves to client analytics store if app has clientAnalytics", () => {
-    const app = {
-      clientAnalytics: {
-        createCollection: () => Promise.resolve(),
-        registerQuery: () => Promise.resolve(),
-      },
-    };
-
-    expect(createEventLogStore(app)).resolves.toBe(
-      mockClientAnalyticsEventStore
-    );
-  });
-
-  test("returns promise that resolves to user data store if app does not have clientAnalytics", () => {
-    const app = {
-      userData: {
-        read: (key, cb) => {
-          cb(null);
-        },
-      },
-    };
-
-    expect(createEventLogStore(app)).resolves.toBe(mockUserDataEventStore);
   });
 });
