@@ -56,6 +56,11 @@ const createEnlearn = app => {
       new Error("Application must provide `enlearn.apiKey` option")
     );
   }
+  if (!app.options.enlearn.appId) {
+    return Promise.reject(
+      new Error("Application must provide `enlearn.appId` option")
+    );
+  }
   if (!app.options.enlearn.client) {
     return Promise.reject(
       new Error("Application must provide `enlearn.client` option")
@@ -75,9 +80,16 @@ const createEnlearn = app => {
   return Promise.all([createEventLogStore(app), getStudentId(app)]).then(
     values => {
       const [logStore, studentId] = values;
-      const { apiKey, apiOverride, client, appData } = app.options.enlearn;
+      const {
+        apiKey,
+        appId,
+        apiOverride,
+        client,
+        appData,
+      } = app.options.enlearn;
       return client.createEnlearnApi({
         apiKey,
+        appId,
         apiOverride,
         appData,
         ecosystem: app.config.enlearnEcosystem,

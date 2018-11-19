@@ -41,6 +41,7 @@ describe("setupPlugin", () => {
       options: {
         enlearn: {
           apiKey: "some api key",
+          appId: "my cool app",
           apiOverride: "some other API server",
           appData,
           client: {
@@ -71,6 +72,7 @@ describe("setupPlugin", () => {
 
     expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith({
       apiKey: "some api key",
+      appId: "my cool app",
       apiOverride: "some other API server",
       appData,
       ecosystem: app.config.enlearnEcosystem,
@@ -91,6 +93,7 @@ describe("setupPlugin", () => {
     options: {
       enlearn: {
         apiKey: "12345",
+        appId: "app",
         client: {},
       },
     },
@@ -109,6 +112,14 @@ describe("setupPlugin", () => {
     delete app.options.enlearn.apiKey;
     return expect(setupPlugin(app)).rejects.toThrow(
       "Application must provide `enlearn.apiKey` option"
+    );
+  });
+
+  test("rejects with error if app.options.enlearn.appId is not set", () => {
+    const app = createAppForSetupFailures();
+    delete app.options.enlearn.appId;
+    return expect(setupPlugin(app)).rejects.toThrow(
+      "Application must provide `enlearn.appId` option"
     );
   });
 
