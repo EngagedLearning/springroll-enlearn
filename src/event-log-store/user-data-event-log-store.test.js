@@ -1,4 +1,4 @@
-import { createUserDataEventLogStore } from "./userdata";
+import { createUserDataEventLogStore } from "./user-data-event-log-store";
 
 const setup = async () => {
   const userData = {

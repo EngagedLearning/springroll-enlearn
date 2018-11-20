@@ -1,4 +1,4 @@
-import { createUserDataPolicyStore } from "./userdata";
+import { createUserDataPolicyStore } from "./user-data-policy-store";
 
 let mockUserData;
 let testObj;

@@ -1,4 +1,4 @@
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createClientAnalyticsEventLogStore } from "./client-analytics-event-log-store";
 
 const setup = async () => {
   const clientAnalytics = {

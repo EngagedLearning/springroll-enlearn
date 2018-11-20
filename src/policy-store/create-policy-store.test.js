@@ -1,7 +1,7 @@
 import { createPolicyStore } from "./create-policy-store";
-import { createUserDataPolicyStore } from "./userdata";
+import { createUserDataPolicyStore } from "./user-data-policy-store";
 
-jest.mock("./userdata");
+jest.mock("./user-data-policy-store");
 
 const mockUserDataPolicyStore = {};
 

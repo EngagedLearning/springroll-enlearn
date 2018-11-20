@@ -1,5 +1,5 @@
 import uuid from "uuid/v4";
-import { createEventLogStore } from "./log-store";
+import { createEventLogStore } from "./event-log-store";
 import { createPolicyStore } from "./policy-store";
 
 const getStudentId = app => {

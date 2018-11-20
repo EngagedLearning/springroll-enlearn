@@ -1,5 +1,5 @@
-import { createUserDataEventLogStore } from "./userdata";
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createUserDataEventLogStore } from "./user-data-event-log-store";
+import { createClientAnalyticsEventLogStore } from "./client-analytics-event-log-store";
 
 export const createEventLogStore = app => {
   if (app.clientAnalytics) {

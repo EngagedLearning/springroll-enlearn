@@ -1,8 +1,8 @@
 import { setupPlugin, teardownPlugin, handleLearningEvent } from "./plugin";
-import { createEventLogStore } from "./log-store";
+import { createEventLogStore } from "./event-log-store";
 import { createPolicyStore } from "./policy-store";
 
-jest.mock("./log-store");
+jest.mock("./event-log-store");
 jest.mock("./policy-store");
 
 const mockEventLogStore = { eventLogStore: true };
