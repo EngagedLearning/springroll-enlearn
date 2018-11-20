@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com) and this pr
 ### Added
 
 - Plugins takes new required `appId` option which is assigned by Enlearn.
+- Plugin implements policy store to support dynamically downloading new machine learning policies.
 
 ## 0.11.0 - 2018-11-13
 

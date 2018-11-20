@@ -1,5 +1,6 @@
 import uuid from "uuid/v4";
 import { createEventLogStore } from "./log-store";
+import { createPolicyStore } from "./policy-store";
 
 const getStudentId = app => {
   return new Promise(resolve => {
@@ -69,28 +70,25 @@ const createEnlearn = app => {
     );
   }
 
-  return Promise.all([createEventLogStore(app), getStudentId(app)]).then(
-    values => {
-      const [logStore, studentId] = values;
-      const {
-        apiKey,
-        appId,
-        apiOverride,
-        client,
-        appData,
-      } = app.options.enlearn;
-      return client.createEnlearnApi({
-        apiKey,
-        appId,
-        apiOverride,
-        appData,
-        ecosystem: app.config.enlearnEcosystem,
-        policy: app.config.enlearnPolicy,
-        logStore,
-        studentId,
-      });
-    }
-  );
+  return Promise.all([
+    createEventLogStore(app),
+    getStudentId(app),
+    createPolicyStore(app),
+  ]).then(values => {
+    const [logStore, studentId, policyStore] = values;
+    const { apiKey, appId, apiOverride, client, appData } = app.options.enlearn;
+    return client.createEnlearnApi({
+      apiKey,
+      appId,
+      apiOverride,
+      appData,
+      ecosystem: app.config.enlearnEcosystem,
+      policy: app.config.enlearnPolicy,
+      logStore,
+      policyStore,
+      studentId,
+    });
+  });
 };
 
 export const setupPlugin = app => {

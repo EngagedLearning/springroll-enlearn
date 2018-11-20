@@ -1,14 +1,16 @@
 import { setupPlugin, teardownPlugin, handleLearningEvent } from "./plugin";
 import { createEventLogStore } from "./log-store";
+import { createPolicyStore } from "./policy-store";
 
 jest.mock("./log-store");
+jest.mock("./policy-store");
 
-const mockEventLogStore = { myStore: true };
+const mockEventLogStore = { eventLogStore: true };
+const mockPolicyStore = { policyStore: true };
 
 beforeAll(() => {
-  createEventLogStore.mockImplementation(() =>
-    Promise.resolve(mockEventLogStore)
-  );
+  createEventLogStore.mockReturnValue(Promise.resolve(mockEventLogStore));
+  createPolicyStore.mockReturnValue(Promise.resolve(mockPolicyStore));
 });
 
 describe("setupPlugin", () => {
@@ -66,7 +68,8 @@ describe("setupPlugin", () => {
       appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
-      logStore: expect.any(Object),
+      logStore: mockEventLogStore,
+      policyStore: mockPolicyStore,
       studentId,
     });
 
