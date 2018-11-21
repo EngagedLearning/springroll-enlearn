@@ -1,25 +1,16 @@
-import {
-  setupPlugin,
-  teardownPlugin,
-  handleLearningEvent,
-  createEventLogStore,
-} from "./plugin";
-import { createUserDataEventLogStore } from "./userdata";
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { setupPlugin, teardownPlugin, handleLearningEvent } from "./plugin";
+import { createEventLogStore } from "./event-log-store";
+import { createPolicyStore } from "./policy-store";
 
-jest.mock("./userdata");
-jest.mock("./clientanalytics");
+jest.mock("./event-log-store");
+jest.mock("./policy-store");
 
-const mockUserDataEventStore = {};
-const mockClientAnalyticsEventStore = {};
+const mockEventLogStore = { eventLogStore: true };
+const mockPolicyStore = { policyStore: true };
 
 beforeAll(() => {
-  createUserDataEventLogStore.mockImplementation(() =>
-    Promise.resolve(mockUserDataEventStore)
-  );
-  createClientAnalyticsEventLogStore.mockImplementation(() =>
-    Promise.resolve(mockClientAnalyticsEventStore)
-  );
+  createEventLogStore.mockReturnValue(Promise.resolve(mockEventLogStore));
+  createPolicyStore.mockReturnValue(Promise.resolve(mockPolicyStore));
 });
 
 describe("setupPlugin", () => {
@@ -41,6 +32,7 @@ describe("setupPlugin", () => {
       options: {
         enlearn: {
           apiKey: "some api key",
+          appId: "my cool app",
           apiOverride: "some other API server",
           appData,
           client: {
@@ -71,11 +63,13 @@ describe("setupPlugin", () => {
 
     expect(app.options.enlearn.client.createEnlearnApi).toHaveBeenCalledWith({
       apiKey: "some api key",
+      appId: "my cool app",
       apiOverride: "some other API server",
       appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
-      logStore: expect.any(Object),
+      logStore: mockEventLogStore,
+      policyStore: mockPolicyStore,
       studentId,
     });
 
@@ -91,6 +85,7 @@ describe("setupPlugin", () => {
     options: {
       enlearn: {
         apiKey: "12345",
+        appId: "app",
         client: {},
       },
     },
@@ -109,6 +104,14 @@ describe("setupPlugin", () => {
     delete app.options.enlearn.apiKey;
     return expect(setupPlugin(app)).rejects.toThrow(
       "Application must provide `enlearn.apiKey` option"
+    );
+  });
+
+  test("rejects with error if app.options.enlearn.appId is not set", () => {
+    const app = createAppForSetupFailures();
+    delete app.options.enlearn.appId;
+    return expect(setupPlugin(app)).rejects.toThrow(
+      "Application must provide `enlearn.appId` option"
     );
   });
 
@@ -230,32 +233,5 @@ describe("handleLearningEvent", () => {
       "0451",
       "cats"
     );
-  });
-});
-
-describe("createEventLogStore", () => {
-  test("returns promise that resolves to client analytics store if app has clientAnalytics", () => {
-    const app = {
-      clientAnalytics: {
-        createCollection: () => Promise.resolve(),
-        registerQuery: () => Promise.resolve(),
-      },
-    };
-
-    expect(createEventLogStore(app)).resolves.toBe(
-      mockClientAnalyticsEventStore
-    );
-  });
-
-  test("returns promise that resolves to user data store if app does not have clientAnalytics", () => {
-    const app = {
-      userData: {
-        read: (key, cb) => {
-          cb(null);
-        },
-      },
-    };
-
-    expect(createEventLogStore(app)).resolves.toBe(mockUserDataEventStore);
   });
 });

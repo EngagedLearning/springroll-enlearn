@@ -1,6 +1,6 @@
 import uuid from "uuid/v4";
-import { createUserDataEventLogStore } from "./userdata";
-import { createClientAnalyticsEventLogStore } from "./clientanalytics";
+import { createEventLogStore } from "./event-log-store";
+import { createPolicyStore } from "./policy-store";
 
 const getStudentId = app => {
   return new Promise(resolve => {
@@ -13,13 +13,6 @@ const getStudentId = app => {
       }
     });
   });
-};
-
-export const createEventLogStore = app => {
-  if (app.clientAnalytics) {
-    return createClientAnalyticsEventLogStore(app.clientAnalytics);
-  }
-  return createUserDataEventLogStore(app.userData);
 };
 
 export const handleLearningEvent = (event, client) => {
@@ -56,6 +49,11 @@ const createEnlearn = app => {
       new Error("Application must provide `enlearn.apiKey` option")
     );
   }
+  if (!app.options.enlearn.appId) {
+    return Promise.reject(
+      new Error("Application must provide `enlearn.appId` option")
+    );
+  }
   if (!app.options.enlearn.client) {
     return Promise.reject(
       new Error("Application must provide `enlearn.client` option")
@@ -72,21 +70,25 @@ const createEnlearn = app => {
     );
   }
 
-  return Promise.all([createEventLogStore(app), getStudentId(app)]).then(
-    values => {
-      const [logStore, studentId] = values;
-      const { apiKey, apiOverride, client, appData } = app.options.enlearn;
-      return client.createEnlearnApi({
-        apiKey,
-        apiOverride,
-        appData,
-        ecosystem: app.config.enlearnEcosystem,
-        policy: app.config.enlearnPolicy,
-        logStore,
-        studentId,
-      });
-    }
-  );
+  return Promise.all([
+    createEventLogStore(app),
+    getStudentId(app),
+    createPolicyStore(app),
+  ]).then(values => {
+    const [logStore, studentId, policyStore] = values;
+    const { apiKey, appId, apiOverride, client, appData } = app.options.enlearn;
+    return client.createEnlearnApi({
+      apiKey,
+      appId,
+      apiOverride,
+      appData,
+      ecosystem: app.config.enlearnEcosystem,
+      policy: app.config.enlearnPolicy,
+      logStore,
+      policyStore,
+      studentId,
+    });
+  });
 };
 
 export const setupPlugin = app => {
