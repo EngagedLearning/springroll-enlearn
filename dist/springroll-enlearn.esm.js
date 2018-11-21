@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 0.11.0
+ * SpringRoll-Enlearn 1.0.0-beta.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -215,6 +215,44 @@ var createClientAnalyticsEventLogStore = function createClientAnalyticsEventLogS
   });
 };
 
+var createEventLogStore = function createEventLogStore(app) {
+  if (app.clientAnalytics) {
+    return createClientAnalyticsEventLogStore(app.clientAnalytics);
+  }
+  return createUserDataEventLogStore(app.userData);
+};
+
+var POLICY_KEY = "enlearnPolicy";
+var savePolicy = function savePolicy(userData) {
+  return function (ecosystemId, policy) {
+    return new Promise(function (resolve) {
+      return userData.write(POLICY_KEY, {
+        ecosystemId: ecosystemId,
+        policy: policy
+      }, resolve);
+    });
+  };
+};
+var loadPolicy = function loadPolicy(userData) {
+  return function (ecosystemId) {
+    return new Promise(function (resolve) {
+      return userData.read(POLICY_KEY, function (data) {
+        resolve(data && data.ecosystemId === ecosystemId ? data.policy : null);
+      });
+    });
+  };
+};
+var createUserDataPolicyStore = function createUserDataPolicyStore(userData) {
+  return Promise.resolve({
+    savePolicy: savePolicy(userData),
+    loadPolicy: loadPolicy(userData)
+  });
+};
+
+var createPolicyStore = function createPolicyStore(app) {
+  return createUserDataPolicyStore(app.userData);
+};
+
 var getStudentId = function getStudentId(app) {
   return new Promise(function (resolve) {
     app.userData.read("studentId", function (data) {
@@ -230,12 +268,6 @@ var getStudentId = function getStudentId(app) {
       }
     });
   });
-};
-var createEventLogStore = function createEventLogStore(app) {
-  if (app.clientAnalytics) {
-    return createClientAnalyticsEventLogStore(app.clientAnalytics);
-  }
-  return createUserDataEventLogStore(app.userData);
 };
 var handleLearningEvent = function handleLearningEvent(event, client) {
   switch (event.event_id) {
@@ -281,6 +313,9 @@ var createEnlearn = function createEnlearn(app) {
   if (!app.options.enlearn.apiKey) {
     return Promise.reject(new Error("Application must provide `enlearn.apiKey` option"));
   }
+  if (!app.options.enlearn.appId) {
+    return Promise.reject(new Error("Application must provide `enlearn.appId` option"));
+  }
   if (!app.options.enlearn.client) {
     return Promise.reject(new Error("Application must provide `enlearn.client` option"));
   }
@@ -290,21 +325,25 @@ var createEnlearn = function createEnlearn(app) {
   if (!app.config.enlearnPolicy) {
     return Promise.reject(new Error("Application must provide `enlearnPolicy` config value"));
   }
-  return Promise.all([createEventLogStore(app), getStudentId(app)]).then(function (values) {
+  return Promise.all([createEventLogStore(app), getStudentId(app), createPolicyStore(app)]).then(function (values) {
     var logStore = values[0],
-        studentId = values[1];
+        studentId = values[1],
+        policyStore = values[2];
     var _app$options$enlearn = app.options.enlearn,
         apiKey = _app$options$enlearn.apiKey,
+        appId = _app$options$enlearn.appId,
         apiOverride = _app$options$enlearn.apiOverride,
         client = _app$options$enlearn.client,
         appData = _app$options$enlearn.appData;
     return client.createEnlearnApi({
       apiKey: apiKey,
+      appId: appId,
       apiOverride: apiOverride,
       appData: appData,
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       logStore: logStore,
+      policyStore: policyStore,
       studentId: studentId
     });
   });
