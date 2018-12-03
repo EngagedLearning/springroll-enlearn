@@ -28,6 +28,7 @@ const app = new Application({
   // ...
   enlearn: {
     apiKey: "your enlearn api key here",
+    appId: "your enlearn app id here",
     client: window.enlearn,
   },
 });
@@ -41,6 +42,7 @@ const app = new Application({
   // ...
   enlearn: {
     apiKey: "your enlearn api key here",
+    appId: "your enlearn app id here",
     client: require("@enlearn/client"),
   },
 });
@@ -56,6 +58,7 @@ const app = new Application({
   // ...
   enlearn: {
     apiKey: "your enlearn api key here",
+    appId: "your enlearn app id here",
     client: enlearnClient,
   },
 });
