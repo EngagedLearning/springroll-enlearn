@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 1.0.0-beta.0
+ * SpringRoll-Enlearn 1.0.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -275,43 +275,6 @@
 	    });
 	  });
 	};
-	var handleLearningEvent = function handleLearningEvent(event, client) {
-	  switch (event.event_id) {
-	    case 7000:
-	      {
-	        var _event$event_data = event.event_data,
-	            problemId = _event$event_data.problemId,
-	            appData = _event$event_data.appData;
-	        return client.recordProblemStart(problemId, appData);
-	      }
-	    case 7001:
-	      {
-	        var _event$event_data2 = event.event_data,
-	            _problemId = _event$event_data2.problemId,
-	            completed = _event$event_data2.completed,
-	            _appData = _event$event_data2.appData;
-	        return client.recordProblemEnd(_problemId, completed, _appData);
-	      }
-	    case 7002:
-	      {
-	        var _event$event_data3 = event.event_data,
-	            stepId = _event$event_data3.stepId,
-	            evidence = _event$event_data3.evidence,
-	            _appData2 = _event$event_data3.appData;
-	        return client.recordStepEvidence(stepId, evidence, _appData2);
-	      }
-	    case 7003:
-	      {
-	        var _event$event_data4 = event.event_data,
-	            _stepId = _event$event_data4.stepId,
-	            scaffoldId = _event$event_data4.scaffoldId,
-	            _appData3 = _event$event_data4.appData;
-	        return client.recordScaffoldShown(_stepId, scaffoldId, _appData3);
-	      }
-	    default:
-	      return Promise.resolve();
-	  }
-	};
 	var createEnlearn = function createEnlearn(app) {
 	  if (!app.options.enlearn) {
 	    return Promise.reject(new Error("Application must provide `enlearn` option object"));
@@ -357,9 +320,6 @@
 	var setupPlugin = function setupPlugin(app) {
 	  return createEnlearn(app).then(function (api) {
 	    app.enlearn = api;
-	    app.on("learningEvent", function (event) {
-	      return handleLearningEvent(event, api);
-	    });
 	    return api.startSession();
 	  });
 	};
