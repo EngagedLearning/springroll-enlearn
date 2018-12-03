@@ -15,29 +15,6 @@ const getStudentId = app => {
   });
 };
 
-export const handleLearningEvent = (event, client) => {
-  switch (event.event_id) {
-    case 7000: {
-      const { problemId, appData } = event.event_data;
-      return client.recordProblemStart(problemId, appData);
-    }
-    case 7001: {
-      const { problemId, completed, appData } = event.event_data;
-      return client.recordProblemEnd(problemId, completed, appData);
-    }
-    case 7002: {
-      const { stepId, evidence, appData } = event.event_data;
-      return client.recordStepEvidence(stepId, evidence, appData);
-    }
-    case 7003: {
-      const { stepId, scaffoldId, appData } = event.event_data;
-      return client.recordScaffoldShown(stepId, scaffoldId, appData);
-    }
-    default:
-      return Promise.resolve();
-  }
-};
-
 const createEnlearn = app => {
   if (!app.options.enlearn) {
     return Promise.reject(
@@ -94,7 +71,6 @@ const createEnlearn = app => {
 export const setupPlugin = app => {
   return createEnlearn(app).then(api => {
     app.enlearn = api;
-    app.on("learningEvent", event => handleLearningEvent(event, api));
     return api.startSession();
   });
 };

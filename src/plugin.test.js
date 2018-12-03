@@ -1,4 +1,4 @@
-import { setupPlugin, teardownPlugin, handleLearningEvent } from "./plugin";
+import { setupPlugin, teardownPlugin } from "./plugin";
 import { createEventLogStore } from "./event-log-store";
 import { createPolicyStore } from "./policy-store";
 
@@ -74,7 +74,6 @@ describe("setupPlugin", () => {
     });
 
     expect(api.startSession).toHaveBeenCalled();
-    expect(app.on).toHaveBeenCalledWith("learningEvent", expect.any(Function));
   });
 
   const createAppForSetupFailures = () => ({
@@ -156,82 +155,5 @@ describe("teardownPlugin", () => {
   test("returns promise if app is not set", () => {
     const app = {};
     expect(teardownPlugin(app)).toBeInstanceOf(Promise);
-  });
-});
-
-describe("handleLearningEvent", () => {
-  test("forwards event 7000 to recordProblemStart", () => {
-    const client = {
-      recordProblemStart: jest.fn(),
-    };
-    const event = {
-      event_id: 7000,
-      event_data: {
-        problemId: "12345",
-        appData: "cats",
-      },
-    };
-    handleLearningEvent(event, client);
-    expect(client.recordProblemStart).toHaveBeenCalledWith("12345", "cats");
-  });
-
-  test("forwards event 7001 to recordProblemEnd", () => {
-    const client = {
-      recordProblemEnd: jest.fn(),
-    };
-    const event = {
-      event_id: 7001,
-      event_data: {
-        problemId: "12345",
-        completed: false,
-        appData: "cats",
-      },
-    };
-    handleLearningEvent(event, client);
-    expect(client.recordProblemEnd).toHaveBeenCalledWith(
-      "12345",
-      false,
-      "cats"
-    );
-  });
-
-  test("forwards event 7002 to recordStepEvidence", () => {
-    const client = {
-      recordStepEvidence: jest.fn(),
-    };
-    const event = {
-      event_id: 7002,
-      event_data: {
-        stepId: "12345",
-        evidence: "correct",
-        appData: "cats",
-      },
-    };
-    handleLearningEvent(event, client);
-    expect(client.recordStepEvidence).toHaveBeenCalledWith(
-      "12345",
-      "correct",
-      "cats"
-    );
-  });
-
-  test("forwards event 7003 to recordScaffoldShown", () => {
-    const client = {
-      recordScaffoldShown: jest.fn(),
-    };
-    const event = {
-      event_id: 7003,
-      event_data: {
-        stepId: "12345",
-        scaffoldId: "0451",
-        appData: "cats",
-      },
-    };
-    handleLearningEvent(event, client);
-    expect(client.recordScaffoldShown).toHaveBeenCalledWith(
-      "12345",
-      "0451",
-      "cats"
-    );
   });
 });
