@@ -1,8 +1,13 @@
-import { setupPlugin, teardownPlugin } from "./plugin";
+import { setup } from "./setup";
+import { teardown } from "./teardown";
 
-(function() {
+(() => {
+  /*
+   * Note: Plugin functions cannot be converted to => functions because they
+   * rely on 'this' to be bound as the application.
+   */
+
   const ApplicationPlugin = window.include("springroll.ApplicationPlugin");
-
   const plugin = new ApplicationPlugin();
 
   plugin.setup = function() {
@@ -16,7 +21,7 @@ import { setupPlugin, teardownPlugin } from "./plugin";
   };
 
   plugin.preload = function(done) {
-    return setupPlugin(this)
+    setup(this)
       .then(() => setTimeout(done, 0))
       .catch(err => {
         console.error("Error initializing Enlearn plugin:");
@@ -25,7 +30,7 @@ import { setupPlugin, teardownPlugin } from "./plugin";
   };
 
   plugin.teardown = function() {
-    teardownPlugin(this).catch(err => {
+    teardown(this).catch(err => {
       console.error("Error shutting down Enlearn plugin");
       console.error(err);
     });
