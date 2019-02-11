@@ -1,16 +1,13 @@
 import { createEnlearnApi } from "./create-enlearn-api";
+import { createDataStore } from "./data-store";
 import { getStudentId } from "./get-student-id";
-import { createEventLogStore } from "./event-log-store";
-import { createPolicyStore } from "./policy-store";
 
 jest.mock("./get-student-id");
-jest.mock("./event-log-store");
-jest.mock("./policy-store");
+jest.mock("./data-store");
 
 beforeEach(() => {
   getStudentId.mockReturnValue(Promise.resolve("abc123"));
-  createEventLogStore.mockReturnValue(Promise.resolve("event-log-store"));
-  createPolicyStore.mockReturnValue(Promise.resolve("policy-store"));
+  createDataStore.mockReturnValue("data store");
 });
 
 test("creates app.enlearn", async () => {
@@ -49,10 +46,9 @@ Array [
         "cats": "dogs",
       },
       "appId": "my cool app",
+      "dataStore": "data store",
       "ecosystem": "ecosystem data",
-      "logStore": "event-log-store",
       "policy": "policy data",
-      "policyStore": "policy-store",
       "studentId": "abc123",
     },
   ],

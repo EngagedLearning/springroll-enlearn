@@ -4,44 +4,45 @@ import { getStudentId } from "./get-student-id";
 jest.mock("uuid/v4");
 
 beforeEach(() => {
-  uuid.mockReturnValue("123-456-789");
+  uuid.mockReturnValue("generated-student-id");
 });
 
-test("reads student ID from app.userData", () => {
-  const app = {
-    userData: {
-      read(key, cb) {
-        if (key === "studentId") {
-          cb({ studentId: "abc123" });
-        } else {
-          cb(null);
-        }
-      },
-      write(key, data, cb) {
-        cb();
-      },
-    },
+test("reads student ID from data store", () => {
+  const dataStore = {
+    read: jest.fn().mockReturnValue(Promise.resolve("id-from-data-store")),
   };
 
-  return expect(getStudentId(app)).resolves.toEqual("abc123");
+  return expect(getStudentId(dataStore)).resolves.toEqual("id-from-data-store");
 });
 
-test("creates a new UUID and writes it to app.userData if one wasn't returned by read", async () => {
-  const app = {
-    userData: {
-      read(key, cb) {
-        cb(null);
-      },
-      write: jest.fn().mockImplementation((key, data, cb) => {
-        cb();
-      }),
-    },
+test("creates a new UUID and writes it to data store if data store resolves to null", async () => {
+  const dataStore = {
+    read: jest.fn().mockReturnValue(Promise.resolve(null)),
+    write: jest.fn().mockReturnValue(Promise.resolve()),
   };
 
-  await expect(getStudentId(app)).resolves.toEqual("123-456-789");
-  expect(app.userData.write).toHaveBeenCalledWith(
+  await expect(getStudentId(dataStore)).resolves.toEqual(
+    "generated-student-id"
+  );
+  expect(dataStore.write).toHaveBeenCalledWith(
     "studentId",
-    { studentId: "123-456-789" },
-    expect.any(Function)
+    "generated-student-id"
+  );
+});
+
+test("creates a new UUID and writes it to data store if data store rejects", async () => {
+  const dataStore = {
+    read: jest
+      .fn()
+      .mockReturnValue(Promise.reject(new Error("Bad data store"))),
+    write: jest.fn().mockReturnValue(Promise.resolve()),
+  };
+
+  await expect(getStudentId(dataStore)).resolves.toEqual(
+    "generated-student-id"
+  );
+  expect(dataStore.write).toHaveBeenCalledWith(
+    "studentId",
+    "generated-student-id"
   );
 });
