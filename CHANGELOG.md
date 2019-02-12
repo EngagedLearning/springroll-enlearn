@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com) and this pr
 
 ### Changed
 
-- Plugin supports latest 2.x Enlearn Client, providing the correct data store implementation.
+- Plugin supports latest 2.x Enlearn Client, providing the correct data store implementation. This upgrade unfortunately will cause a loss of stored data.
 
 ## 1.0.0 - 2018-12-03
 
