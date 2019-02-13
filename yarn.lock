@@ -613,6 +613,11 @@
   resolved "https://registry.yarnpkg.com/@enlearn/eslint-config/-/eslint-config-1.4.0.tgz#828385ed768f397c69b1a28c771a8a5af54dbdda"
   integrity sha512-/ZywSJDEK1sSMdLP01TXLp951kLd9YHRtcleKU/YkhOZFgNx9T8h6hzmgrvdYuBWXrEHyo/PAUzQveqnKw28Tw==
 
+"@enlearn/warehouse@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@enlearn/warehouse/-/warehouse-0.3.0.tgz#7293666bbabaf7a0e422ff0f6687cfc03ab82b26"
+  integrity sha512-g43CFCdrJA/2Bf4pM6IDtShUFK/4fc1BFBpYuSw0i8s6rYeB8G3ss/exkhftTV/f2nN9JEvtiPk6xzSyYvwDqg==
+
 "@iamstarkov/listr-update-renderer@0.4.1":
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/@iamstarkov/listr-update-renderer/-/listr-update-renderer-0.4.1.tgz#d7c48092a2dcf90fd672b6c8b458649cb350c77e"
