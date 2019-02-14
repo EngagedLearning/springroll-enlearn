@@ -1,13 +1,13 @@
 import { createEnlearnApi } from "./create-enlearn-api";
-import { createDataStore } from "./data-store";
 import { getStudentId } from "./get-student-id";
+import { createWarehouse } from "@enlearn/warehouse";
 
 jest.mock("./get-student-id");
-jest.mock("./data-store");
+jest.mock("@enlearn/warehouse");
 
 beforeEach(() => {
   getStudentId.mockReturnValue(Promise.resolve("abc123"));
-  createDataStore.mockReturnValue("data store");
+  createWarehouse.mockReturnValue("warehouse");
 });
 
 test("creates app.enlearn", async () => {
@@ -46,10 +46,10 @@ Array [
         "cats": "dogs",
       },
       "appId": "my cool app",
-      "dataStore": "data store",
       "ecosystem": "ecosystem data",
       "policy": "policy data",
       "studentId": "abc123",
+      "warehouse": "warehouse",
     },
   ],
 ]

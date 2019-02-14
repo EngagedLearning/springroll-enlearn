@@ -45,6 +45,7 @@
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "@enlearn/eslint-config": "^1.4.0",
+    "@enlearn/warehouse": "^0.4.0",
     "babel-jest": "^24.1.0",
     "changelog-parser": "^2.6.0",
     "eslint": "^5.13.0",
