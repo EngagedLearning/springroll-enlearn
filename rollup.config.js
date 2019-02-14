@@ -11,9 +11,7 @@ const input = "src/index.js";
 const plugins = [
   resolve({ browser: true }),
   commonjs(),
-  babel({
-    exclude: "node_modules/**",
-  }),
+  babel(),
   cleanup(),
   license({
     banner: {

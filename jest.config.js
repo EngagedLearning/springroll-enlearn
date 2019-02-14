@@ -4,6 +4,5 @@
 module.exports = {
   clearMocks: true,
   rootDir: "src",
-  testEnvironment: "jsdom",
-  testURL: "http://localhost",
+  transformIgnorePatterns: ["/node_modules/(?!@enlearn/warehouse).+\\.js$"],
 };
