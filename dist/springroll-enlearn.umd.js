@@ -1,5 +1,5 @@
 /**
- * SpringRoll-Enlearn 1.0.0
+ * SpringRoll-Enlearn 2.0.0
  * https://github.com/engagedlearning/springroll-enlearn
  *
  * Copyright © 2018. The Public Broadcasting Service (PBS).
@@ -38,326 +38,284 @@
  * please contact Enlearn: https://www.enlearn.org/contact.
  */
 
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
-}(this, (function () { 'use strict';
+(function (factory) {
+  typeof define === 'function' && define.amd ? define(factory) :
+  factory();
+}(function () { 'use strict';
 
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
-	}
+  var error = function error(value) {
+    return new Error("Application must provide " + value);
+  };
+  var validateApp = function validateApp(app) {
+    return new Promise(function (resolve, reject) {
+      if (!app.options.enlearn) {
+        reject(error("`enlearn` option object"));
+      } else if (!app.options.enlearn.apiKey) {
+        reject(error("`enlearn.apiKey` option"));
+      } else if (!app.options.enlearn.appId) {
+        reject(error("`enlearn.appId` option"));
+      } else if (!app.options.enlearn.client) {
+        reject(error("`enlearn.client` option"));
+      } else if (!app.config.enlearnEcosystem) {
+        reject(error("`enlearnEcosystem` config value"));
+      } else if (!app.config.enlearnPolicy) {
+        reject(error("`enlearnPolicy` config value"));
+      }
+      resolve(app);
+    });
+  };
 
-	var rngBrowser = createCommonjsModule(function (module) {
-	var getRandomValues = (typeof(crypto) != 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto)) ||
-	                      (typeof(msCrypto) != 'undefined' && typeof window.msCrypto.getRandomValues == 'function' && msCrypto.getRandomValues.bind(msCrypto));
-	if (getRandomValues) {
-	  var rnds8 = new Uint8Array(16);
-	  module.exports = function whatwgRNG() {
-	    getRandomValues(rnds8);
-	    return rnds8;
-	  };
-	} else {
-	  var rnds = new Array(16);
-	  module.exports = function mathRNG() {
-	    for (var i = 0, r; i < 16; i++) {
-	      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
-	      rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
-	    }
-	    return rnds;
-	  };
-	}
-	});
+  function createCommonjsModule(fn, module) {
+  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  }
 
-	var byteToHex = [];
-	for (var i = 0; i < 256; ++i) {
-	  byteToHex[i] = (i + 0x100).toString(16).substr(1);
-	}
-	function bytesToUuid(buf, offset) {
-	  var i = offset || 0;
-	  var bth = byteToHex;
-	  return ([bth[buf[i++]], bth[buf[i++]],
-		bth[buf[i++]], bth[buf[i++]], '-',
-		bth[buf[i++]], bth[buf[i++]], '-',
-		bth[buf[i++]], bth[buf[i++]], '-',
-		bth[buf[i++]], bth[buf[i++]], '-',
-		bth[buf[i++]], bth[buf[i++]],
-		bth[buf[i++]], bth[buf[i++]],
-		bth[buf[i++]], bth[buf[i++]]]).join('');
-	}
-	var bytesToUuid_1 = bytesToUuid;
+  var rngBrowser = createCommonjsModule(function (module) {
+    var getRandomValues = typeof crypto != 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto) || typeof msCrypto != 'undefined' && typeof window.msCrypto.getRandomValues == 'function' && msCrypto.getRandomValues.bind(msCrypto);
+    if (getRandomValues) {
+      var rnds8 = new Uint8Array(16);
+      module.exports = function whatwgRNG() {
+        getRandomValues(rnds8);
+        return rnds8;
+      };
+    } else {
+      var rnds = new Array(16);
+      module.exports = function mathRNG() {
+        for (var i = 0, r; i < 16; i++) {
+          if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+          rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+        }
+        return rnds;
+      };
+    }
+  });
 
-	function v4(options, buf, offset) {
-	  var i = buf && offset || 0;
-	  if (typeof(options) == 'string') {
-	    buf = options === 'binary' ? new Array(16) : null;
-	    options = null;
-	  }
-	  options = options || {};
-	  var rnds = options.random || (options.rng || rngBrowser)();
-	  rnds[6] = (rnds[6] & 0x0f) | 0x40;
-	  rnds[8] = (rnds[8] & 0x3f) | 0x80;
-	  if (buf) {
-	    for (var ii = 0; ii < 16; ++ii) {
-	      buf[i + ii] = rnds[ii];
-	    }
-	  }
-	  return buf || bytesToUuid_1(rnds);
-	}
-	var v4_1 = v4;
+  var byteToHex = [];
+  for (var i = 0; i < 256; ++i) {
+    byteToHex[i] = (i + 0x100).toString(16).substr(1);
+  }
+  function bytesToUuid(buf, offset) {
+    var i = offset || 0;
+    var bth = byteToHex;
+    return [bth[buf[i++]], bth[buf[i++]], bth[buf[i++]], bth[buf[i++]], '-', bth[buf[i++]], bth[buf[i++]], '-', bth[buf[i++]], bth[buf[i++]], '-', bth[buf[i++]], bth[buf[i++]], '-', bth[buf[i++]], bth[buf[i++]], bth[buf[i++]], bth[buf[i++]], bth[buf[i++]], bth[buf[i++]]].join('');
+  }
+  var bytesToUuid_1 = bytesToUuid;
 
-	var EVENTS_KEY = "enlearnEventLog";
-	var NOT_UPLOADED_KEY = "enlearnEventLogNotUploaded";
-	var createUserDataEventLogStore = function createUserDataEventLogStore(userData) {
-	  var events = [];
-	  var notUploadedIds = [];
-	  var getAllEvents = function getAllEvents() {
-	    return Promise.resolve(events.slice());
-	  };
-	  var recordEvent = function recordEvent(event) {
-	    events.push(event);
-	    notUploadedIds.push(event.id);
-	    return new Promise(function (resolve) {
-	      return userData.write(EVENTS_KEY, events, function () {
-	        userData.write(NOT_UPLOADED_KEY, notUploadedIds, resolve);
-	      });
-	    });
-	  };
-	  var getEventsToUpload = function getEventsToUpload() {
-	    return Promise.resolve(events.filter(function (e) {
-	      return notUploadedIds.indexOf(e.id) >= 0;
-	    }));
-	  };
-	  var markEventsAsUploaded = function markEventsAsUploaded(eventIds) {
-	    notUploadedIds = notUploadedIds.filter(function (id) {
-	      return eventIds.indexOf(id) < 0;
-	    });
-	    return new Promise(function (resolve) {
-	      return userData.write(NOT_UPLOADED_KEY, notUploadedIds, resolve);
-	    });
-	  };
-	  return Promise.all([new Promise(function (resolve) {
-	    userData.read(EVENTS_KEY, function (data) {
-	      events = data || [];
-	      resolve();
-	    });
-	  }), new Promise(function (resolve) {
-	    userData.read(NOT_UPLOADED_KEY, function (data) {
-	      notUploadedIds = data || [];
-	      resolve();
-	    });
-	  })]).then(function () {
-	    return {
-	      getAllEvents: getAllEvents,
-	      recordEvent: recordEvent,
-	      getEventsToUpload: getEventsToUpload,
-	      markEventsAsUploaded: markEventsAsUploaded
-	    };
-	  });
-	};
+  function v4(options, buf, offset) {
+    var i = buf && offset || 0;
+    if (typeof options == 'string') {
+      buf = options === 'binary' ? new Array(16) : null;
+      options = null;
+    }
+    options = options || {};
+    var rnds = options.random || (options.rng || rngBrowser)();
+    rnds[6] = rnds[6] & 0x0f | 0x40;
+    rnds[8] = rnds[8] & 0x3f | 0x80;
+    if (buf) {
+      for (var ii = 0; ii < 16; ++ii) {
+        buf[i + ii] = rnds[ii];
+      }
+    }
+    return buf || bytesToUuid_1(rnds);
+  }
+  var v4_1 = v4;
 
-	var EVENTS_COLLECTION = "enlearnEventLog";
-	var QUERY_ALL = "getAllEvents";
-	var QUERY_NOT_UPLOADED = "getEventsToUpload";
-	var QUERY_MARK_UPLOADED = "markEventsAsUploaded";
-	var createClientAnalyticsEventLogStore = function createClientAnalyticsEventLogStore(clientAnalytics) {
-	  var getAllEvents = function getAllEvents() {
-	    return clientAnalytics.query(QUERY_ALL, {}, EVENTS_COLLECTION);
-	  };
-	  var recordEvent = function recordEvent(event) {
-	    return clientAnalytics.insert(EVENTS_COLLECTION, {
-	      event: event,
-	      uploaded: false
-	    });
-	  };
-	  var getEventsToUpload = function getEventsToUpload() {
-	    return clientAnalytics.query(QUERY_NOT_UPLOADED, {}, EVENTS_COLLECTION);
-	  };
-	  var markEventsAsUploaded = function markEventsAsUploaded(ids) {
-	    return clientAnalytics.query(QUERY_MARK_UPLOADED, {
-	      ids: ids
-	    }, EVENTS_COLLECTION);
-	  };
-	  var store = {
-	    getAllEvents: getAllEvents,
-	    recordEvent: recordEvent,
-	    getEventsToUpload: getEventsToUpload,
-	    markEventsAsUploaded: markEventsAsUploaded
-	  };
-	  return clientAnalytics.createCollection(EVENTS_COLLECTION).then(function () {
-	    return clientAnalytics.registerQuery(QUERY_ALL, function (collection) {
-	      return collection.chain().simplesort("event.sequenceNumber", false).data().map(function (r) {
-	        return r.event;
-	      });
-	    });
-	  }).then(function () {
-	    return clientAnalytics.registerQuery(QUERY_NOT_UPLOADED, function (collection) {
-	      return collection.chain().find({
-	        uploaded: {
-	          $ne: true
-	        }
-	      }).limit(50).data().map(function (r) {
-	        return r.event;
-	      });
-	    });
-	  }).then(function () {
-	    return clientAnalytics.registerQuery(QUERY_MARK_UPLOADED, function (collection, params) {
-	      var records = collection.chain().find({
-	        uploaded: {
-	          $ne: true
-	        }
-	      }).where(function (r) {
-	        return params.ids.indexOf(r.event.id) >= 0;
-	      }).data();
-	      for (var i = 0; i < records.length; i++) {
-	        var r = records[i];
-	        r.uploaded = true;
-	        collection.update(r);
-	      }
-	      return null;
-	    });
-	  }).then(function () {
-	    return store;
-	  });
-	};
+  var createNewId = function createNewId(dataStore) {
+    var id = v4_1();
+    return dataStore.write("studentId", id).then(function () {
+      return id;
+    }, function () {
+      return id;
+    });
+  };
+  var getStudentId = function getStudentId(dataStore) {
+    return dataStore.read("studentId").then(function (id) {
+      return id || createNewId(dataStore);
+    }).catch(function () {
+      return createNewId(dataStore);
+    });
+  };
 
-	var createEventLogStore = function createEventLogStore(app) {
-	  if (app.clientAnalytics) {
-	    return createClientAnalyticsEventLogStore(app.clientAnalytics);
-	  }
-	  return createUserDataEventLogStore(app.userData);
-	};
+  var createInMemoryStorage = function createInMemoryStorage() {
+    var data = {};
+    return {
+      getItem: function getItem(key) {
+        var value = data[key];
+        return value === undefined ? null : value;
+      },
+      setItem: function setItem(key, value) {
+        data[key] = value.toString();
+      },
+      removeItem: function removeItem(key) {
+        delete data[key];
+      },
+      clear: function clear() {
+        Object.keys(data).forEach(function (k) {
+          delete data[k];
+        });
+      }
+    };
+  };
 
-	var POLICY_KEY = "enlearnPolicy";
-	var savePolicy = function savePolicy(userData) {
-	  return function (ecosystemId, policy) {
-	    return new Promise(function (resolve) {
-	      return userData.write(POLICY_KEY, {
-	        ecosystemId: ecosystemId,
-	        policy: policy
-	      }, resolve);
-	    });
-	  };
-	};
-	var loadPolicy = function loadPolicy(userData) {
-	  return function (ecosystemId) {
-	    return new Promise(function (resolve) {
-	      return userData.read(POLICY_KEY, function (data) {
-	        resolve(data && data.ecosystemId === ecosystemId ? data.policy : null);
-	      });
-	    });
-	  };
-	};
-	var createUserDataPolicyStore = function createUserDataPolicyStore(userData) {
-	  return Promise.resolve({
-	    savePolicy: savePolicy(userData),
-	    loadPolicy: loadPolicy(userData)
-	  });
-	};
+  var canUseStorage = function canUseStorage(storage) {
+    if (!storage) {
+      return false;
+    }
+    try {
+      var testKey = "enlearn_warehouse_storage_support_test_key";
+      storage.setItem(testKey, "");
+      storage.removeItem(testKey);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
 
-	var createPolicyStore = function createPolicyStore(app) {
-	  return createUserDataPolicyStore(app.userData);
-	};
+  var createScopedStorage = function createScopedStorage(_ref) {
+    var storage = _ref.storage,
+        scope = _ref.scope;
+    var fullKey = function fullKey(key) {
+      return scope + "." + key;
+    };
+    return {
+      getItem: function getItem(key) {
+        return storage.getItem(fullKey(key));
+      },
+      setItem: function setItem(key, value) {
+        return storage.setItem(fullKey(key), value);
+      },
+      removeItem: function removeItem(key) {
+        return storage.removeItem(fullKey(key));
+      },
+      clear: function clear() {
+        return storage.clear();
+      }
+    };
+  };
 
-	var getStudentId = function getStudentId(app) {
-	  return new Promise(function (resolve) {
-	    app.userData.read("studentId", function (data) {
-	      if (data && data.studentId) {
-	        resolve(data.studentId);
-	      } else {
-	        data = {
-	          studentId: v4_1()
-	        };
-	        app.userData.write("studentId", data, function () {
-	          return resolve(data.studentId);
-	        });
-	      }
-	    });
-	  });
-	};
-	var createEnlearn = function createEnlearn(app) {
-	  if (!app.options.enlearn) {
-	    return Promise.reject(new Error("Application must provide `enlearn` option object"));
-	  }
-	  if (!app.options.enlearn.apiKey) {
-	    return Promise.reject(new Error("Application must provide `enlearn.apiKey` option"));
-	  }
-	  if (!app.options.enlearn.appId) {
-	    return Promise.reject(new Error("Application must provide `enlearn.appId` option"));
-	  }
-	  if (!app.options.enlearn.client) {
-	    return Promise.reject(new Error("Application must provide `enlearn.client` option"));
-	  }
-	  if (!app.config.enlearnEcosystem) {
-	    return Promise.reject(new Error("Application must provide `enlearnEcosystem` config value"));
-	  }
-	  if (!app.config.enlearnPolicy) {
-	    return Promise.reject(new Error("Application must provide `enlearnPolicy` config value"));
-	  }
-	  return Promise.all([createEventLogStore(app), getStudentId(app), createPolicyStore(app)]).then(function (values) {
-	    var logStore = values[0],
-	        studentId = values[1],
-	        policyStore = values[2];
-	    var _app$options$enlearn = app.options.enlearn,
-	        apiKey = _app$options$enlearn.apiKey,
-	        appId = _app$options$enlearn.appId,
-	        apiOverride = _app$options$enlearn.apiOverride,
-	        client = _app$options$enlearn.client,
-	        appData = _app$options$enlearn.appData;
-	    return client.createEnlearnApi({
-	      apiKey: apiKey,
-	      appId: appId,
-	      apiOverride: apiOverride,
-	      appData: appData,
-	      ecosystem: app.config.enlearnEcosystem,
-	      policy: app.config.enlearnPolicy,
-	      logStore: logStore,
-	      policyStore: policyStore,
-	      studentId: studentId
-	    });
-	  });
-	};
-	var setupPlugin = function setupPlugin(app) {
-	  return createEnlearn(app).then(function (api) {
-	    app.enlearn = api;
-	    return api.startSession();
-	  });
-	};
-	var teardownPlugin = function teardownPlugin(app) {
-	  if (app.enlearn) {
-	    var enlearn = app.enlearn;
-	    delete app.enlearn;
-	    return enlearn.endSession();
-	  }
-	  return Promise.resolve();
-	};
+  var getOrCreateStorage = function getOrCreateStorage() {
+    if (canUseStorage(window.localStorage)) {
+      return window.localStorage;
+    } else if (canUseStorage(window.sessionStorage)) {
+      return window.sessionStorage;
+    } else {
+      return new createInMemoryStorage();
+    }
+  };
+  var createWarehouse = function createWarehouse(_ref) {
+    var scope = _ref.scope;
+    var storage = createScopedStorage({
+      storage: getOrCreateStorage(),
+      scope: scope
+    });
+    return {
+      write: function write(key, value) {
+        return new Promise(function (resolve, reject) {
+          try {
+            storage.setItem(key, value);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      },
+      read: function read(key) {
+        return new Promise(function (resolve, reject) {
+          try {
+            resolve(storage.getItem(key));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      },
+      remove: function remove(key) {
+        return new Promise(function (resolve, reject) {
+          try {
+            storage.removeItem(key);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      },
+      clear: function clear() {
+        return new Promise(function (resolve, reject) {
+          try {
+            storage.clear();
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+    };
+  };
 
-	(function () {
-	  var ApplicationPlugin = window.include("springroll.ApplicationPlugin");
-	  var plugin = new ApplicationPlugin();
-	  plugin.setup = function () {
-	    var enlearnOptions = {
-	      apiKey: null,
-	      apiOverride: null,
-	      client: null,
-	      appData: {}
-	    };
-	    this.options.add("enlearn", enlearnOptions);
-	  };
-	  plugin.preload = function (done) {
-	    return setupPlugin(this).then(function () {
-	      return setTimeout(done, 0);
-	    }).catch(function (err) {
-	      console.error("Error initializing Enlearn plugin:");
-	      console.error(err);
-	    });
-	  };
-	  plugin.teardown = function () {
-	    teardownPlugin(this).catch(function (err) {
-	      console.error("Error shutting down Enlearn plugin");
-	      console.error(err);
-	    });
-	  };
-	})();
+  var createEnlearnApi = function createEnlearnApi(app) {
+    var _app$options$enlearn = app.options.enlearn,
+        apiKey = _app$options$enlearn.apiKey,
+        appId = _app$options$enlearn.appId,
+        apiOverride = _app$options$enlearn.apiOverride,
+        client = _app$options$enlearn.client,
+        appData = _app$options$enlearn.appData;
+    var warehouse = createWarehouse({
+      scope: "enlearn." + appId
+    });
+    return getStudentId(warehouse).then(function (studentId) {
+      return client.createEnlearnApi({
+        apiKey: apiKey,
+        appId: appId,
+        apiOverride: apiOverride,
+        appData: appData,
+        ecosystem: app.config.enlearnEcosystem,
+        policy: app.config.enlearnPolicy,
+        studentId: studentId,
+        warehouse: warehouse
+      });
+    });
+  };
 
-})));
+  var setup = function setup(app) {
+    return validateApp(app).then(createEnlearnApi).then(function (api) {
+      app.enlearn = api;
+      return api.startSession();
+    });
+  };
+
+  var teardown = function teardown(app) {
+    if (app.enlearn) {
+      var enlearn = app.enlearn;
+      delete app.enlearn;
+      return enlearn.endSession();
+    }
+    return Promise.resolve();
+  };
+
+  (function () {
+    var ApplicationPlugin = window.include("springroll.ApplicationPlugin");
+    var plugin = new ApplicationPlugin();
+    plugin.setup = function () {
+      var enlearnOptions = {
+        apiKey: null,
+        apiOverride: null,
+        client: null,
+        appData: {}
+      };
+      this.options.add("enlearn", enlearnOptions);
+    };
+    plugin.preload = function (done) {
+      setup(this).then(function () {
+        return setTimeout(done, 0);
+      }).catch(function (err) {
+        console.error("Error initializing Enlearn plugin:");
+        console.error(err);
+      });
+    };
+    plugin.teardown = function () {
+      teardown(this).catch(function (err) {
+        console.error("Error shutting down Enlearn plugin");
+        console.error(err);
+      });
+    };
+  })();
+
+}));
