@@ -15,6 +15,7 @@ export const createEnlearnApi = app => {
       policy: app.config.enlearnPolicy,
       studentId,
       warehouse,
+      disableApi: true,
     })
   );
 };

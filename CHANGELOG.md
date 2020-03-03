@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## UNRELEASED
+
+### Changed
+
+- Disabled all incoming/outgoing network traffic to support game evergreening (NOTE: Update `@enlearn/client` dependency to ^3.1.0 when adopting this change)
+
 ## 2.0.0 - 2019-02-21
 
 ### Changed
