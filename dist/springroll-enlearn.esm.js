@@ -1,19 +1,19 @@
 /**
- * SpringRoll-Enlearn 2.0.0
+ * SpringRoll-Enlearn 3.0.0
  * https://github.com/engagedlearning/springroll-enlearn
- *
+ * 
  * Copyright © 2018. The Public Broadcasting Service (PBS).
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,12 +21,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
+ * 
  * The contents of this package were developed under a cooperative agreement
  * #PRU295A150003, from the U.S. Department of Education. However, these contents
  * do not necessarily represent the policy of the Department of Education, and
  * you should not assume endorsement by the Federal Government.
- *
+ * 
  * This Software was commissioned by and developed for PBS under contract with
  * Enlearn. This Software is intended to connect educational games developed by
  * third parties for PBS to Enlearn's proprietary educational learning software
@@ -264,7 +264,8 @@ var createEnlearnApi = function createEnlearnApi(app) {
       ecosystem: app.config.enlearnEcosystem,
       policy: app.config.enlearnPolicy,
       studentId: studentId,
-      warehouse: warehouse
+      warehouse: warehouse,
+      disableApi: true
     });
   });
 };
