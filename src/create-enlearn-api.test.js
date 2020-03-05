@@ -46,11 +46,11 @@ Array [
         "cats": "dogs",
       },
       "appId": "my cool app",
+      "disableApi": true,
       "ecosystem": "ecosystem data",
       "policy": "policy data",
       "studentId": "abc123",
       "warehouse": "warehouse",
-      "disableApi": true
     },
   ],
 ]
